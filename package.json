@@ -7,7 +7,9 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "test:rls": "bash tests/integration/run_all.sh",
+    "test:e2e": "node tests/e2e/anonymous-access.mjs"
   },
   "dependencies": {
     "@supabase/ssr": "^0.12.4",
