@@ -154,14 +154,80 @@ Aggiornato: 2026-08-23. Ambito di questa sessione: **solo fase database**.
 - [ ] Merge in `main` — **NON ancora fatto**, in attesa di revisione visuale
       mobile reale da parte dell'utente sulla Deploy Preview
 
-## ⬜ Fasi successive (non iniziate — fuori scope di questa sessione)
+## ✅ Fase 5 — Post-Collaboration MVP (FASE 0-16)
 
-- [ ] Esperienze reali (tabelle, creazione Business, candidature reali,
-      matching, collaborazioni) — Fase 4 è solo UI foundation, nessuno
-      schema toccato
-- [ ] Messaging reale, favorites reali, notifiche reali aggiuntive, mappe
+Merge in `main`: PR #6 (FASE 0-2) + PR #7 (FASE 3-16).
+Nessuna migration, nessuna modifica RLS, nessuna modifica di schema.
+
+- [x] FASE 0-2 — reviews + notifications: data layer con RLS, viste
+      collaborazione completata, liste notifiche (PR #6)
+- [x] FASE 3 — invio deliverable: `lib/submissions/data.ts` + form sulla
+      collaborazione attiva. Le piattaforme offerte corrispondono esattamente
+      all'enum `platform_type` (`instagram, tiktok, youtube, facebook, x,
+      linkedin, other`)
+- [x] FASE 4 — campanella notifiche con contatore non lette (Creator e Business)
+- [x] FASE 5 — profilo Creator: verifica, livello, collaborazioni completate,
+      media valutazioni, storico
+- [x] FASE 6 — profilo Business (`/business/profilo`): logo, ragione sociale,
+      città, descrizione, sito, Instagram, stato verifica, contatori reali,
+      valutazioni ricevute, storico collaborazioni
+- [x] FASE 7 — dashboard Business (`/business/dashboard`): experiences
+      pubblicate, candidature, collaborazioni attive/completate, creator unici,
+      contenuti approvati. Tasso di accettazione = accettate/(accettate+rifiutate),
+      "Non disponibile" finché nulla è stato deciso. Nessun ROI/EMV/reach/revenue
+- [x] FASE 8 — report Experience (`/business/experiences/[id]/report`) con link
+      reali ai contenuti approvati
+- [x] FASE 9 — navigazione: nuovo route group `app/business/(app)/` con layout,
+      sidebar e bottom nav (prima Candidature e Collaborazioni erano raggiungibili
+      solo digitando l'URL). Creator: "Messaggi" sostituito da "Collaborazioni",
+      rotta placeholder eliminata
+- [x] FASE 10 — rimossi il badge fittizio "75% compatibile" (nessun algoritmo di
+      matching esiste) e `lib/demo/experiences.ts` (le Deploy Preview mostravano
+      ai tester experiences mock invece di quelle reali)
+- [x] FASE 11 — `lib/actions/errors.ts`: gli errori Supabase/PostgREST non
+      raggiungono più il browser (niente SQLSTATE, nomi di tabella o di policy).
+      `error.tsx`, `not-found.tsx` e skeleton di loading in italiano
+- [x] FASE 12 — QA mobile misurata in Chromium reale a 375×812, 390×844,
+      430×932, 1280×900: zero overflow orizzontale; corretti i touch target
+      dei componenti di questa milestone (l'elimina notifica era 10×16 px)
+- [x] FASE 13/15 — 39 asserzioni di sicurezza in
+      `tests/integration/50_post_collaboration_tests.sql`: suite RLS **153/153**
+      su PostgreSQL 16 reale (era 114)
+- [x] FASE 14 — audit timeout: ogni query delle nuove aree è limitata con
+      `withTimeout(10_000)`
+- [x] FASE 16 — `tests/e2e/anonymous-access.mjs`: 36/36 rotte core
+
+Due difetti trovati dai test e corretti:
+
+- `updateCollaborationStatus` filtrava con `.in('creator_id, business_id', [id])`,
+  che non è PostgREST valido: ogni chiamata falliva. Ora `.eq('business_id', user.id)`
+- Il flusso di completamento non aveva UI: `canCompleteCollaboration` veniva
+  calcolato e mai renderizzato, `updateCollaborationStatus` non era chiamato da
+  nessuna parte. Nessuna collaborazione poteva diventare `completed` dal
+  prodotto, quindi tutto il flusso post-collaborazione era irraggiungibile
+
+### Limitazioni note della fase 5
+
+- [ ] La policy `collaborations_update_participant` permette a **entrambe** le
+      parti di cambiare lo stato: un Creator può auto-completare chiamando l'API
+      direttamente e gonfiare il proprio `completed_collaborations_count`.
+      Limitazione pre-esistente dichiarata nella migration 004; il mitigante
+      applicativo è in `updateCollaborationStatus` (scope `business_id`), la UI
+      non lo offre mai a un Creator. Stringere la policy è una modifica RLS,
+      fuori dallo scope di questa milestone
+- [ ] Test E2E autenticati e verifica RLS sul progetto Supabase hosted —
+      **NOT EXECUTED**: `*.supabase.co` è bloccato dalla policy di rete di questo
+      ambiente (403 su CONNECT). Da rieseguire dove l'egress è consentito
+- [ ] Netlify Production — **NOT VERIFIED** da questo ambiente
+- [ ] Touch target sotto i 44 px pre-esistenti e fuori da questa milestone:
+      cuore "preferiti" della ExperienceCard (36×36) e i campi di login/signup
+      (36-38 px)
+
+## ⬜ Fasi successive (non iniziate — fuori scope)
+
+- [ ] Messaging reale, favorites reali, mappe
 - [ ] Pagamenti
 - [ ] Integrazioni social (verifica automatica metriche, pubblicazione)
-- [ ] Reporting/analytics
+- [ ] Analytics avanzate, recommendation/matching engine
 
 Non iniziare le fasi successive senza indicazione esplicita.

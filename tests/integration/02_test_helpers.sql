@@ -152,3 +152,45 @@ exception
     values (p_role, p_test_name, 'DENY', '0 rows visible', 'ERROR', false, sqlerrm);
 end;
 $$;
+
+-- -----------------------------------------------------------------------------
+-- expect_rejected — the database must REFUSE this write, by any mechanism
+-- -----------------------------------------------------------------------------
+-- expect_denied() deliberately only accepts SQLSTATE 42501 (insufficient
+-- privilege), because for the per-role RLS files "denied" specifically means
+-- "RLS/GRANT stopped it". Some invariants are instead enforced by CHECK or
+-- UNIQUE constraints and legitimately fail with 23514 / 23505 — a duplicate
+-- review, a rating outside 1..5, a self-review. Those are still "the database
+-- refused", so they need a helper that treats any error, or a zero-row write,
+-- as a pass. Only a write that actually succeeds is a failure.
+create or replace function testing.expect_rejected(
+  p_role text, p_test_name text, p_sql text
+) returns void
+language plpgsql
+as $$
+declare
+  v_rows int;
+begin
+  begin
+    execute p_sql;
+    get diagnostics v_rows = row_count;
+    if v_rows > 0 then
+      raise exception using errcode = 'VT001', message = 'vaytu_test_unexpected_success';
+    end if;
+    insert into testing.results (role_under_test, test_name, kind, expected, actual, passed)
+    values (p_role, p_test_name, 'REJECT', 'rejected', 'rejected (0 rows affected)', true);
+  exception
+    when others then
+      if sqlstate = 'VT001' then
+        insert into testing.results (role_under_test, test_name, kind, expected, actual, passed, detail)
+        values (p_role, p_test_name, 'REJECT', 'rejected',
+                'ALLOWED (unexpected, ' || v_rows || ' row(s))', false,
+                'write should have been rejected but succeeded');
+      else
+        insert into testing.results (role_under_test, test_name, kind, expected, actual, passed, detail)
+        values (p_role, p_test_name, 'REJECT', 'rejected',
+                'rejected (' || sqlstate || ')', true, sqlerrm);
+      end if;
+  end;
+end;
+$$;

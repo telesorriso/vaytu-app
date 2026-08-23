@@ -1,15 +1,23 @@
 import Link from 'next/link';
+import CreatorNotificationBell from './CreatorNotificationBell';
 
 // =============================================================================
 // VAYTU — CreatorHeader
 // =============================================================================
-// Wordmark + notifications + avatar. Notifications is a static/decorative
-// bell for V1 (no real notification center wired up here — out of scope,
-// see PROJECT instructions: "notifiche reali aggiuntive"). Avatar links to
-// Profilo, the one place settings/logout live in this phase.
+// Wordmark + notifications + avatar. Notifications now shows an interactive
+// bell with unread count. Avatar links to Profilo, the one place
+// settings/logout live in this phase.
 // =============================================================================
 
-export function CreatorHeader({ avatarUrl, fullName }: { avatarUrl: string | null; fullName: string }) {
+export function CreatorHeader({
+  avatarUrl,
+  fullName,
+  unreadNotifications = 0
+}: {
+  avatarUrl: string | null;
+  fullName: string;
+  unreadNotifications?: number;
+}) {
   const initial = fullName.trim().charAt(0).toUpperCase() || '?';
 
   return (
@@ -19,20 +27,7 @@ export function CreatorHeader({ avatarUrl, fullName }: { avatarUrl: string | nul
       </span>
 
       <div className="flex items-center gap-2.5">
-        <span
-          aria-hidden="true"
-          className="flex h-8 w-8 items-center justify-center rounded-full text-zinc-400 dark:text-zinc-500"
-          title="Notifiche"
-        >
-          <svg viewBox="0 0 24 24" className="h-[18px] w-[18px]" fill="none" stroke="currentColor" strokeWidth="1.6">
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              d="M6 8a6 6 0 0 1 12 0c0 4 1.5 5.5 1.5 5.5H4.5S6 12 6 8Z"
-            />
-            <path strokeLinecap="round" d="M10 18a2 2 0 0 0 4 0" />
-          </svg>
-        </span>
+        <CreatorNotificationBell unreadCount={unreadNotifications} />
 
         <Link
           href="/creator/profilo"

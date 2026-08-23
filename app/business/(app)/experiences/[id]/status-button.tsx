@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import type { ExperienceStatus } from '@/lib/db/types';
 import { submitChangeStatus } from '../actions';
+import { toUserMessage } from '@/lib/actions/errors';
 
 interface StatusButtonProps {
   experienceId: string;
@@ -48,7 +49,7 @@ export function StatusButton({ experienceId, currentStatus }: StatusButtonProps)
         setError(result.error);
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Errore sconosciuto');
+      setError(toUserMessage(err));
     } finally {
       setIsLoading(false);
     }

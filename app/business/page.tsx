@@ -13,6 +13,6 @@ export default async function BusinessDashboard() {
     redirect('/business/onboarding/status');
   }
 
-  // Redirect to experiences dashboard
-  redirect('/business/experiences');
+  // Landing destination for a verified Business is the reporting dashboard.
+  redirect('/business/dashboard');
 }

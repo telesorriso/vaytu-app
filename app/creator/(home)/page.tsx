@@ -3,7 +3,6 @@ import { getCreatorLevel } from '@/lib/creator-home/level';
 import { listPublishedExperiencesWithBusinesses } from '@/lib/experiences/data';
 import { CreatorProfileCard } from '@/components/creator-home/CreatorProfileCard';
 import { OpportunitiesSection } from '@/components/creator-home/OpportunitiesSection';
-import { DEMO_EXPERIENCES, isDemoDataEnabled } from '@/lib/demo/experiences';
 
 // =============================================================================
 // VAYTU — Creator Home ("Scopri")
@@ -27,8 +26,8 @@ export default async function CreatorHomePage() {
 
   const firstName = profile.full_name.trim().split(/\s+/)[0] || profile.full_name;
 
-  // Load published experiences for discovery
-  const experiences = isDemoDataEnabled() ? DEMO_EXPERIENCES : await listPublishedExperiencesWithBusinesses();
+  // Real published Experiences only — the demo fallback was removed in FASE 10.
+  const experiences = await listPublishedExperiencesWithBusinesses();
 
   return (
     <div className="space-y-3.5 md:space-y-5">

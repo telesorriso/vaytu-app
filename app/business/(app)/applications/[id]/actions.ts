@@ -3,6 +3,7 @@
 import { requireRole } from '@/lib/auth/dal';
 import { updateApplicationStatus as updateApplicationStatusInDb } from '@/lib/experiences/data';
 import type { ApplicationStatus } from '@/lib/db/types';
+import { toUserMessage } from '@/lib/actions/errors';
 
 export interface ApplicationActionState {
   success?: boolean;
@@ -31,7 +32,7 @@ export async function updateApplicationStatus(
 
     return { error: 'Errore sconosciuto' };
   } catch (err) {
-    const message = err instanceof Error ? err.message : 'Errore sconosciuto';
+    const message = toUserMessage(err);
     return { error: message };
   }
 }

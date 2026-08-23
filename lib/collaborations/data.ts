@@ -2,6 +2,7 @@ import 'server-only';
 import { createClient } from '@/lib/supabase/server';
 import { getAuthUser } from '@/lib/auth/dal';
 import { withTimeout } from '@/lib/actions/timeout';
+import { toUserMessage } from '@/lib/actions/errors';
 import type {
   CollaborationRow,
   CollaborationDeliverableRow,
@@ -443,6 +444,23 @@ export async function updateSubmissionStatus(
 /**
  * Updates collaboration status (mark as completed, cancelled, etc).
  */
+/**
+ * Updates a collaboration's status on behalf of the owning BUSINESS.
+ *
+ * Scoped with .eq('business_id', user.id) rather than "either participant":
+ * the RLS policy collaborations_update_participant deliberately allows both
+ * sides to move the status (see 004_rls_policies.sql — a finer state machine
+ * is a documented MVP limitation), but completion is the Business's decision.
+ * Completing is what fires fn_on_collaboration_completed, which increments the
+ * Creator's protected completed_collaborations_count and unlocks reviews, so
+ * letting the Creator drive it from the app would let them inflate their own
+ * counter. This filter is the application-level half of that restriction.
+ *
+ * NOTE: the previous implementation filtered with
+ * `.in('creator_id, business_id', [user.id])`, which is not valid PostgREST —
+ * that string is not a column name, so every call errored out. The function
+ * was unreferenced, so the breakage was never observed.
+ */
 export async function updateCollaborationStatus(
   collaborationId: string,
   status: CollaborationStatus
@@ -458,15 +476,14 @@ export async function updateCollaborationStatus(
         .from('collaborations')
         .update({ status })
         .eq('id', collaborationId)
-        .in('creator_id, business_id', [user.id]),
+        .eq('business_id', user.id),
       10_000
     );
 
-    if (error) return { error: error.message };
+    if (error) return { error: toUserMessage(error, 'updateCollaborationStatus') };
     return { success: true };
   } catch (err) {
-    const message = err instanceof Error ? err.message : 'Errore sconosciuto';
-    return { error: message };
+    return { error: toUserMessage(err, 'updateCollaborationStatus') };
   }
 }
 

@@ -4,6 +4,7 @@ import { getAuthUser } from '@/lib/auth/dal';
 import { getCollaborationDetail, getCollaborationDeliverables, getCollaborationSubmissions, canCompleteCollaboration, getCollaborationNextAction } from '@/lib/collaborations/data';
 import { getReceivedReviews, getGivenReviews } from '@/lib/reviews/data';
 import CompletedCollaborationView from './completed';
+import { CompleteButton } from './complete-button';
 
 interface CollaborationPageProps {
   params: { id: string };
@@ -68,6 +69,14 @@ export default async function BusinessCollaborationPage({ params }: Collaboratio
               {nextAction.description}
             </p>
           </div>
+        )}
+
+        {collaboration.status === 'active' && (
+          <CompleteButton
+            collaborationId={params.id}
+            canComplete={completion.canComplete}
+            reason={completion.reason}
+          />
         )}
 
         <div className="grid gap-6 lg:grid-cols-3">

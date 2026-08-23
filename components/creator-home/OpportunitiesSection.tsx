@@ -5,23 +5,23 @@ import { useMemo, useState } from 'react';
 import { OpportunityFilters, type OpportunityFilter } from './OpportunityFilters';
 import { ExperienceCard } from './ExperienceCard';
 import { EmptyOpportunities } from './EmptyOpportunities';
-import type { DemoExperience, DemoExperienceCategory } from '@/lib/demo/experiences';
 import type { ExperienceRow } from '@/lib/db/types';
 
 // =============================================================================
 // VAYTU — OpportunitiesSection
 // =============================================================================
-// Glue between the filter row and the card grid. Filtering is intentionally
-// simple (one category match, no ranking/matching algorithm) — this is UI
-// foundation, not the real matching feature. "Vicino a me" has no
-// distance/geo data source yet, so it honestly falls through to the empty
-// state rather than pretending to filter by location.
+// Glue between the filter row and the card grid, over REAL published
+// Experiences only. The demo/mock data path was removed in FASE 10: real
+// Experiences now ship, so showing fabricated cards in Deploy Previews would
+// mean testers reviewing content that does not exist.
 //
-// Accepts both DemoExperience (from demo mode) and ExperienceRow (from DB).
-// For real experiences, businessName is looked up separately and passed through.
+// Filtering is one category match, no ranking — matching is out of scope, and
+// the card no longer claims a "% compatibile" score because nothing computes
+// one. "Vicino a me" has no geo data source, so it honestly falls through to
+// the empty state rather than pretending to filter by distance.
 // =============================================================================
 
-const FILTER_TO_CATEGORY: Partial<Record<OpportunityFilter, DemoExperienceCategory | string>> = {
+const FILTER_TO_CATEGORY: Partial<Record<OpportunityFilter, string>> = {
   Food: 'food',
   Wellness: 'wellness',
   Altro: 'lifestyle',
@@ -31,10 +31,22 @@ interface ExperienceWithBusinessName extends ExperienceRow {
   businessName?: string;
 }
 
+function compensationLabel(exp: ExperienceRow): string {
+  if (exp.compensation_type === 'paid' && exp.compensation_value) {
+    return `€${exp.compensation_value}`;
+  }
+  return (
+    exp.compensation_type
+      .split('_')
+      .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+      .join(' ') || 'Esperienza'
+  );
+}
+
 export function OpportunitiesSection({
   experiences,
 }: {
-  experiences: DemoExperience[] | ExperienceWithBusinessName[];
+  experiences: ExperienceWithBusinessName[];
 }) {
   const [active, setActive] = useState<OpportunityFilter>('Tutte');
 
@@ -42,16 +54,7 @@ export function OpportunitiesSection({
     if (active === 'Tutte') return experiences;
     const category = FILTER_TO_CATEGORY[active];
     if (!category) return []; // "Vicino a me" / "Beauty": no matching data source yet
-    return experiences.filter((exp) => {
-      // Handle both demo and real experiences
-      if ('category' in exp && (exp as ExperienceRow).category) {
-        return (exp as ExperienceRow).category === category;
-      }
-      if ('category' in exp && (exp as DemoExperience).category) {
-        return (exp as DemoExperience).category === category;
-      }
-      return false;
-    });
+    return experiences.filter((exp) => exp.category === category);
   }, [experiences, active]);
 
   return (
@@ -59,7 +62,7 @@ export function OpportunitiesSection({
       <div className="space-y-0.5">
         <h2 className="text-lg font-semibold text-zinc-950 dark:text-zinc-50">Opportunità per te</h2>
         <p className="text-sm text-zinc-500 dark:text-zinc-400">
-          Experiences selezionate in base al tuo profilo.
+          Le Experiences pubblicate dai Business.
         </p>
       </div>
 
@@ -69,55 +72,23 @@ export function OpportunitiesSection({
         <EmptyOpportunities />
       ) : (
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {filtered.map((exp) => {
-            // Check if this is a demo experience or a real one
-            const isDemoExp = 'benefit' in exp;
-
-            if (isDemoExp) {
-              const demo = exp as DemoExperience;
-              return (
-                <ExperienceCard
-                  key={demo.id}
-                  title={demo.title}
-                  businessName={demo.businessName}
-                  city={demo.city}
-                  benefit={demo.benefit}
-                  tags={[demo.categoryLabel, ...demo.tags.filter((tag) => tag !== demo.categoryLabel)]}
-                  compatibilityPct={demo.compatibilityPct}
-                  imageGradient={demo.imageGradient}
-                  imageUrl={demo.imageUrl}
-                />
-              );
-            } else {
-              // Real experience - wrap in Link for navigation
-              const real = exp as ExperienceWithBusinessName;
-              return (
-                <Link
-                  key={real.id}
-                  href={`/creator/experiences/${real.id}`}
-                  className="hover:shadow-lg transition-shadow"
-                >
-                  <ExperienceCard
-                    title={real.title}
-                    businessName={real.businessName || 'Business'}
-                    city={real.city || 'Luogo sconosciuto'}
-                    benefit={
-                      real.compensation_type === 'paid' && real.compensation_value
-                        ? `€${real.compensation_value}`
-                        : real.compensation_type
-                            .split('_')
-                            .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-                            .join(' ') || 'Esperienza'
-                    }
-                    tags={real.category ? [real.category] : []}
-                    compatibilityPct={75} // TODO: implement matching algorithm
-                    imageGradient="linear-gradient(135deg, #667eea 0%, #764ba2 100%)"
-                    imageUrl={undefined}
-                  />
-                </Link>
-              );
-            }
-          })}
+          {filtered.map((exp) => (
+            <Link
+              key={exp.id}
+              href={`/creator/experiences/${exp.id}`}
+              className="transition-shadow hover:shadow-lg"
+            >
+              <ExperienceCard
+                title={exp.title}
+                businessName={exp.businessName || 'Business'}
+                city={exp.city || 'Luogo non indicato'}
+                benefit={compensationLabel(exp)}
+                tags={exp.category ? [exp.category] : []}
+                imageGradient="linear-gradient(135deg, #667eea 0%, #764ba2 100%)"
+                imageUrl={undefined}
+              />
+            </Link>
+          ))}
         </div>
       )}
     </section>

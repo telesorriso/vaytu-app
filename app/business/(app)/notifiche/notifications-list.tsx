@@ -89,7 +89,7 @@ export default function NotificationsList({ initialNotifications }: Notification
           <button
             onClick={onMarkAllAsRead}
             disabled={loading}
-            className="text-sm text-blue-600 hover:text-blue-700 disabled:opacity-50 dark:text-blue-400"
+            className="-mr-2 min-h-11 px-2 py-2 text-sm text-blue-600 hover:text-blue-700 disabled:opacity-50 dark:text-blue-400"
           >
             {loading ? 'In elaborazione...' : 'Segna tutte come lette'}
           </button>
@@ -128,14 +128,14 @@ export default function NotificationsList({ initialNotifications }: Notification
                 {!notification.is_read && (
                   <button
                     onClick={() => onMarkAsRead(notification.id)}
-                    className="text-xs font-semibold text-blue-600 hover:text-blue-700 dark:text-blue-400"
+                    className="min-h-11 min-w-11 px-2 text-xs font-semibold text-blue-600 hover:text-blue-700 dark:text-blue-400"
                   >
                     Leggi
                   </button>
                 )}
                 <button
                   onClick={() => onDelete(notification.id)}
-                  className="text-xs font-semibold text-zinc-400 hover:text-red-600 dark:hover:text-red-400"
+                  className="min-h-11 min-w-11 px-2 text-xs font-semibold text-zinc-400 hover:text-red-600 dark:hover:text-red-400"
                 >
                   ✕
                 </button>

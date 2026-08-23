@@ -11,6 +11,7 @@
 import { revalidatePath } from 'next/cache';
 import { requireRole } from '@/lib/auth/dal';
 import { createClient } from '@/lib/supabase/server';
+import { toUserMessage } from '@/lib/actions/errors';
 
 export interface AdminActionState {
   error?: string;
@@ -37,7 +38,7 @@ export async function approveCreator(
     .from('creator_verifications')
     .update({ status: 'verified', reviewed_by: admin.id, reviewed_at: new Date().toISOString() })
     .eq('id', verificationId);
-  if (error) return initialErr(error.message);
+  if (error) return initialErr(toUserMessage(error, 'admin'));
 
   revalidatePath('/admin/creators');
   revalidatePath(`/admin/creators/${creatorId}`);
@@ -65,7 +66,7 @@ export async function rejectCreator(
       rejection_reason: reason,
     })
     .eq('id', verificationId);
-  if (error) return initialErr(error.message);
+  if (error) return initialErr(toUserMessage(error, 'admin'));
 
   revalidatePath('/admin/creators');
   revalidatePath(`/admin/creators/${creatorId}`);
@@ -86,7 +87,7 @@ export async function toggleSuspendCreator(
     .from('profiles')
     .update({ is_active: nextIsActive })
     .eq('id', creatorId);
-  if (error) return initialErr(error.message);
+  if (error) return initialErr(toUserMessage(error, 'admin'));
 
   revalidatePath('/admin/creators');
   revalidatePath(`/admin/creators/${creatorId}`);
@@ -120,7 +121,7 @@ export async function setVerifiedMetrics(
       verified_at: new Date().toISOString(),
     })
     .eq('id', metricId);
-  if (error) return initialErr(error.message);
+  if (error) return initialErr(toUserMessage(error, 'admin'));
 
   revalidatePath(`/admin/creators/${creatorId}`);
   return { success: true };
@@ -140,7 +141,7 @@ export async function assignLevel(
     .from('creator_profiles')
     .update({ current_level_id: levelId })
     .eq('id', creatorId);
-  if (error) return initialErr(error.message);
+  if (error) return initialErr(toUserMessage(error, 'admin'));
 
   revalidatePath(`/admin/creators/${creatorId}`);
   return { success: true };
@@ -164,7 +165,7 @@ export async function approveBusiness(
     .from('business_verifications')
     .update({ status: 'verified', reviewed_by: admin.id, reviewed_at: new Date().toISOString() })
     .eq('id', verificationId);
-  if (error) return initialErr(error.message);
+  if (error) return initialErr(toUserMessage(error, 'admin'));
 
   revalidatePath('/admin/business');
   revalidatePath(`/admin/business/${businessId}`);
@@ -192,7 +193,7 @@ export async function rejectBusiness(
       rejection_reason: reason,
     })
     .eq('id', verificationId);
-  if (error) return initialErr(error.message);
+  if (error) return initialErr(toUserMessage(error, 'admin'));
 
   revalidatePath('/admin/business');
   revalidatePath(`/admin/business/${businessId}`);
@@ -213,7 +214,7 @@ export async function toggleSuspendBusiness(
     .from('profiles')
     .update({ is_active: nextIsActive })
     .eq('id', businessId);
-  if (error) return initialErr(error.message);
+  if (error) return initialErr(toUserMessage(error, 'admin'));
 
   revalidatePath('/admin/business');
   revalidatePath(`/admin/business/${businessId}`);
