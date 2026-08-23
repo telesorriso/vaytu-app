@@ -1,10 +1,18 @@
+import { redirect } from 'next/navigation';
 import { requireRole } from '@/lib/auth/dal';
+import { getCreatorOnboardingData, hasSubmittedApplication } from '@/lib/onboarding/creator';
 import { logout } from '@/app/auth/actions';
 
 export default async function CreatorDashboard() {
-  // Authoritative, server-side check — not just proxy.ts. Redirects
-  // anonymous visitors to /login and non-creators to their own dashboard.
   const profile = await requireRole('creator');
+
+  const data = await getCreatorOnboardingData();
+  if (!data || !hasSubmittedApplication(data)) {
+    redirect('/creator/onboarding');
+  }
+  if (data.latestVerification!.status !== 'verified') {
+    redirect('/creator/onboarding/status');
+  }
 
   return (
     <div className="flex flex-1 flex-col items-center justify-center gap-4 bg-zinc-50 px-6 text-center dark:bg-black">
@@ -12,8 +20,8 @@ export default async function CreatorDashboard() {
         Dashboard Creator
       </h1>
       <p className="text-zinc-600 dark:text-zinc-400">
-        Ciao, {profile.fullName}. Onboarding ed Experiences non ancora
-        implementati.
+        Ciao, {profile.fullName}. Profilo verificato. Experiences non ancora
+        implementate.
       </p>
       <form action={logout}>
         <button

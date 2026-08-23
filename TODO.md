@@ -70,14 +70,61 @@ Aggiornato: 2026-08-23. Ambito di questa sessione: **solo fase database**.
 - [ ] Nessun provisioning di un account Admin reale (per design, non
       registrabile pubblicamente) — da creare fuori banda quando serve
 
+## ✅ Fase 3 — Onboarding MVP: completata in questa sessione (branch `feature/onboarding-mvp`)
+
+- [x] Migration additive 007 (colonne `username`/`instagram_handle`/`tiktok_handle`
+      su `creator_profiles`; `address`/`instagram_handle`/`cover_image_url` su
+      `business_profiles`), 008 (bucket Storage `public-assets` pubblico +
+      `verification-evidence` privato, owner+admin only), 009 (seed dei 4
+      Vaytu Level: Explorer/Insider/Select/Icon) — scritte, validate sul
+      harness locale (007+009; 008 richiede lo schema `storage` reale di
+      Supabase), **non ancora applicate all'hosted** (connector Supabase
+      disabilitato per questa chat — vedi Remaining blockers)
+- [x] Onboarding Creator: stepper 6 passi (identità, località/categorie,
+      social, evidence — 4 screenshot, portfolio, riepilogo), autosave sui
+      campi testo, resume dopo logout/login calcolato dai dati già salvati
+      (nessuna colonna "step corrente" necessaria), invio candidatura →
+      `creator_verifications` (status `pending`)
+- [x] Onboarding Business: stepper 5 passi (attività, localizzazione,
+      contatti, presentazione, riepilogo), stesso pattern di autosave/resume,
+      invio verifica → `business_verifications` (status `pending`)
+- [x] Admin: lista Creator/Business pending, dettaglio con screenshot (URL
+      firmati dal bucket privato), inserimento metriche verificate,
+      assegnazione manuale Vaytu Level, approve/reject/suspend (suspend =
+      `profiles.is_active`, già esistente e admin-only)
+- [x] Build, lint, typecheck: **PASS**
+- [x] Redirect anonimo verificato realmente (HTTP 307) su tutte le nuove
+      rotte, incluse le sotto-rotte onboarding/admin
+- [x] `netlify.toml` pronto; deploy Netlify **non attivabile** in questa
+      sessione (connector Netlify non collegato all'org)
+- [x] Migration 007, 008, 009 **applicate e verificate sul progetto Supabase
+      hosted** (`jkyqxqqvqbmjfufsktgp`): schema drift zero (20 tabelle,
+      20/20 RLS, 113 policy pubbliche, 31 trigger — tutti invariati), 2
+      bucket Storage creati (`public-assets` pubblico, `verification-evidence`
+      privato) con 7 policy verificate riga per riga, 4 Vaytu Level seminati
+      (Explorer/Insider/Select/Icon). Security advisor: 0 ERROR, stessi 8
+      WARN pre-esistenti (helper RLS intenzionalmente pubbliche) + 1 nuovo
+      WARN non collegato a queste migration (`auth_leaked_password_protection`
+      — impostazione Auth del progetto, non toccata)
+
+### Limitazioni note della fase 3
+
+- [ ] Test E2E completi (signup → onboarding → verifica admin → dashboard)
+      contro Supabase reale — **NOT EXECUTED**, stesso blocco di rete della
+      fase 2 (`*.supabase.co` non raggiungibile da questo sandbox)
+- [ ] Deploy Preview Netlify — **NOT EXECUTED**, connector non collegato
+- [ ] Autosave è a livello di "intero step" (debounced, tutti i campi testo
+      dello step corrente), non per singolo campo isolato — scelta
+      pragmatica, vedi report della fase
+- [ ] Nessuna UI per re-inviare la candidatura dopo un rifiuto (la pagina di
+      stato mostra il motivo ma non riapre lo stepper) — rimandato
+
 ## ⬜ Fasi successive (non iniziate — fuori scope di questa sessione)
 
-- [ ] Onboarding applicativo completo (bio, niches, verifica documenti)
 - [ ] Esperienze (creazione, candidature, collaborazioni) lato UI
-- [ ] File upload
 - [ ] UI/design completo
 - [ ] Pagamenti
 - [ ] Integrazioni social (verifica automatica metriche, pubblicazione)
-- [ ] Admin panel (funzioni amministrative oltre al login)
+- [ ] Reporting/analytics
 
 Non iniziare le fasi successive senza indicazione esplicita.

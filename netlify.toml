@@ -1,0 +1,22 @@
+# =============================================================================
+# VAYTU — Netlify configuration
+# =============================================================================
+# Netlify's official Next.js Runtime auto-detects the framework and handles
+# the App Router (SSR, Server Actions, proxy.ts) with zero extra plugin
+# config needed. This file just pins the build command and publish
+# directory explicitly, plus a Node version matching development.
+# =============================================================================
+
+[build]
+  command = "npm run build"
+  publish = ".next"
+
+[build.environment]
+  NODE_VERSION = "22"
+
+# Required at build/runtime — set these as Netlify Site environment
+# variables (Site settings -> Environment variables), NOT in this file:
+#   NEXT_PUBLIC_SUPABASE_URL
+#   NEXT_PUBLIC_SUPABASE_ANON_KEY
+# Both are public/anon values — see /.env.example and /docs/SECURITY_MODEL.md.
+# Never set a service_role key here or anywhere in this repository.
