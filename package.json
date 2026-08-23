@@ -9,7 +9,9 @@
     "lint": "eslint",
     "typecheck": "tsc --noEmit",
     "test:rls": "bash tests/integration/run_all.sh",
-    "test:e2e": "node tests/e2e/anonymous-access.mjs"
+    "test:e2e": "node tests/e2e/anonymous-access.mjs",
+    "test:recovery": "node tests/e2e/password-recovery.mjs",
+    "test:redirect": "node tests/unit/redirect-safety.mjs"
   },
   "dependencies": {
     "@supabase/ssr": "^0.12.4",
