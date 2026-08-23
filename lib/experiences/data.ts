@@ -8,6 +8,7 @@ import type {
   ExperienceSlotRow,
   ExperienceStatus,
   CompensationType,
+  ApplicationRow,
 } from '@/lib/db/types';
 
 /**
@@ -388,5 +389,48 @@ export async function listPublishedExperiencesWithBusinesses(): Promise<
       .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
   } catch {
     return [];
+  }
+}
+
+/**
+ * Creates an application (candidatura) from a creator to an experience.
+ * The creator_id is taken from the authenticated user.
+ * The business_id and status are set from the experience and default 'pending'.
+ */
+export async function createApplication(
+  experienceId: string,
+  message: string
+): Promise<ApplicationRow | null> {
+  const user = await getAuthUser();
+  if (!user) return null;
+
+  const supabase = await createClient();
+
+  try {
+    // First, get the experience to know the business_id
+    const experience = await getExperienceDetail(experienceId);
+    if (!experience) return null;
+
+    // Create the application
+    const { data, error } = await withTimeout(
+      supabase
+        .from('applications')
+        .insert({
+          experience_id: experienceId,
+          slot_id: null,
+          creator_id: user.id,
+          business_id: experience.business_id,
+          status: 'pending',
+          message: message.trim(),
+        } as ApplicationRow)
+        .select()
+        .single(),
+      10_000
+    );
+
+    if (error || !data) return null;
+    return data as ApplicationRow;
+  } catch {
+    return null;
   }
 }
