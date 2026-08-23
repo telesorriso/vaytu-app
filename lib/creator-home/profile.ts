@@ -7,8 +7,8 @@ export interface CollaborationHistoryItem {
   status: string;
   created_at: string;
   experience?: {
-    title: string;
-  };
+    title?: string;
+  } | null;
 }
 
 /**
@@ -26,9 +26,7 @@ export async function getCreatorCollaborationHistory(limit = 10): Promise<Collab
         id,
         status,
         created_at,
-        experience:experiences(
-          title
-        )
+        experiences!inner(title)
       `
       )
       .eq('status', 'completed')
@@ -42,7 +40,15 @@ export async function getCreatorCollaborationHistory(limit = 10): Promise<Collab
       return [];
     }
 
-    return data || [];
+    // Map experiences array to experience object for consistency
+    const mappedData = (data || []).map((item: Record<string, unknown>) => ({
+      id: item.id as string,
+      status: item.status as string,
+      created_at: item.created_at as string,
+      experience: ((item.experiences as unknown[]) || [])[0] || null,
+    }));
+
+    return mappedData;
   } catch (err) {
     console.error('Error in getCreatorCollaborationHistory:', err);
     return [];

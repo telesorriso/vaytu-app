@@ -15,7 +15,6 @@ export default async function ProfiloPage() {
   const data = await getCreatorOnboardingData();
   const { profile, creatorProfile } = data!;
   const level = await getCreatorLevel(creatorProfile.current_level_id);
-  const receivedReviews = await getReceivedReviews();
   const collaborationHistory = await getCreatorCollaborationHistory(5);
   const reviewStats = await getCreatorReviewStats();
 

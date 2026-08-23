@@ -15,11 +15,9 @@ const platformOptions = [
   'instagram',
   'tiktok',
   'youtube',
-  'twitch',
-  'twitter',
   'facebook',
+  'x',
   'linkedin',
-  'pinterest',
   'other',
 ];
 
