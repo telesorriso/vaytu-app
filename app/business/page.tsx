@@ -1,10 +1,18 @@
+import { redirect } from 'next/navigation';
 import { requireRole } from '@/lib/auth/dal';
+import { getBusinessOnboardingData, hasSubmittedApplication } from '@/lib/onboarding/business';
 import { logout } from '@/app/auth/actions';
 
 export default async function BusinessDashboard() {
-  // Authoritative, server-side check — not just proxy.ts. Redirects
-  // anonymous visitors to /login and non-businesses to their own dashboard.
   const profile = await requireRole('business');
+
+  const data = await getBusinessOnboardingData();
+  if (!data || !hasSubmittedApplication(data)) {
+    redirect('/business/onboarding');
+  }
+  if (data.latestVerification!.status !== 'verified') {
+    redirect('/business/onboarding/status');
+  }
 
   return (
     <div className="flex flex-1 flex-col items-center justify-center gap-4 bg-zinc-50 px-6 text-center dark:bg-black">
@@ -12,8 +20,8 @@ export default async function BusinessDashboard() {
         Dashboard Business
       </h1>
       <p className="text-zinc-600 dark:text-zinc-400">
-        Ciao, {profile.fullName}. Gestione Experiences non ancora
-        implementata.
+        Ciao, {profile.fullName}. Attività verificata. Gestione Experiences
+        non ancora implementata.
       </p>
       <form action={logout}>
         <button

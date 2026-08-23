@@ -29,16 +29,16 @@ insert into public.profiles (id, role, email, full_name) values
 -- -----------------------------------------------------------------------------
 -- Reference data
 -- -----------------------------------------------------------------------------
-insert into public.creator_levels (id, code, name, sort_order, min_reliability_score) values
-  ('aaaaaaaa-0000-0000-0000-000000000001', 'bronze', 'Bronze', 1, 0),
-  ('aaaaaaaa-0000-0000-0000-000000000002', 'silver', 'Silver', 2, 50);
+-- Real canonical levels are seeded by migration 009_seed_creator_levels.sql
+-- (Explorer/Insider/Select/Icon) — no fixture-only rows here, so the fixed
+-- test UUIDs below reference them by code lookup instead of a fixed id.
 
 -- -----------------------------------------------------------------------------
 -- Creator / business profile extensions
 -- -----------------------------------------------------------------------------
 insert into public.creator_profiles (id, display_name, city, country, current_level_id) values
-  ('22222222-2222-2222-2222-222222222222', 'Creator A', 'Milano', 'IT', 'aaaaaaaa-0000-0000-0000-000000000001'),
-  ('33333333-3333-3333-3333-333333333333', 'Creator B', 'Roma',   'IT', 'aaaaaaaa-0000-0000-0000-000000000001');
+  ('22222222-2222-2222-2222-222222222222', 'Creator A', 'Milano', 'IT', (select id from public.creator_levels where code = 'explorer')),
+  ('33333333-3333-3333-3333-333333333333', 'Creator B', 'Roma',   'IT', (select id from public.creator_levels where code = 'explorer'));
 
 insert into public.business_profiles (id, company_name, city, country) values
   ('44444444-4444-4444-4444-444444444444', 'Business A Srl', 'Firenze', 'IT'),

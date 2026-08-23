@@ -79,7 +79,7 @@ select testing.expect_denied('creator_A', 'cannot modify own verification_status
   $q$update public.creator_profiles set verification_status = 'rejected' where id = '22222222-2222-2222-2222-222222222222'$q$);
 
 select testing.expect_denied('creator_A', 'cannot modify own current_level_id (Vaytu Level)',
-  $q$update public.creator_profiles set current_level_id = 'aaaaaaaa-0000-0000-0000-000000000002' where id = '22222222-2222-2222-2222-222222222222'$q$);
+  $q$update public.creator_profiles set current_level_id = (select id from public.creator_levels where code = 'insider') where id = '22222222-2222-2222-2222-222222222222'$q$);
 
 select testing.expect_denied('creator_A', 'cannot modify own completed_collaborations_count',
   $q$update public.creator_profiles set completed_collaborations_count = 999 where id = '22222222-2222-2222-2222-222222222222'$q$);

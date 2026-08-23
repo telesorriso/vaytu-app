@@ -9,7 +9,7 @@ select testing.expect_select_count('anonymous', 'sees published experiences only
   $q$select * from public.experiences$q$, 2);
 
 select testing.expect_select_count('anonymous', 'sees creator_levels reference data',
-  $q$select * from public.creator_levels$q$, 2);
+  $q$select * from public.creator_levels$q$, 4);
 
 select testing.expect_select_count('anonymous', 'sees business_profiles (public company directory)',
   $q$select * from public.business_profiles$q$, 2);

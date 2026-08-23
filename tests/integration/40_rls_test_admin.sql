@@ -31,14 +31,14 @@ select testing.expect_allowed_write('admin', 'can set a creator''s reliability_s
   $q$update public.creator_profiles set reliability_score = 42 where id = '22222222-2222-2222-2222-222222222222'$q$);
 
 select testing.expect_allowed_write('admin', 'can change a creator''s Vaytu Level',
-  $q$update public.creator_profiles set current_level_id = 'aaaaaaaa-0000-0000-0000-000000000002' where id = '22222222-2222-2222-2222-222222222222'$q$);
+  $q$update public.creator_profiles set current_level_id = (select id from public.creator_levels where code = 'insider') where id = '22222222-2222-2222-2222-222222222222'$q$);
 
 select testing.expect_allowed_write('admin', 'can reject a creator verification',
   $q$update public.creator_verifications set status = 'rejected', reviewed_by = '11111111-1111-1111-1111-111111111111'
      where id = 'dddddddd-0000-0000-0000-000000000001'$q$);
 
 select testing.expect_allowed_write('admin', 'can manage creator_levels reference data',
-  $q$update public.creator_levels set description = 'Livello base' where code = 'bronze'$q$);
+  $q$update public.creator_levels set description = 'Livello base' where code = 'explorer'$q$);
 
 select testing.expect_allowed_write('admin', 'can insert an admin_note on any entity',
   $q$insert into public.admin_notes (target_table, target_id, author_id, note)
