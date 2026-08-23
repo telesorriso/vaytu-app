@@ -85,7 +85,7 @@ export default function SubmissionForm({
     return (
       <button
         onClick={() => setIsOpen(true)}
-        className="text-xs font-semibold text-blue-600 hover:text-blue-700 dark:text-blue-400"
+        className="mt-2 inline-flex min-h-11 items-center text-xs font-semibold text-blue-600 hover:text-blue-700 dark:text-blue-400"
       >
         + Invia contenuto
       </button>
@@ -114,7 +114,7 @@ export default function SubmissionForm({
             value={contentUrl}
             onChange={(e) => setContentUrl(e.target.value)}
             placeholder="https://instagram.com/p/..."
-            className="mt-1 w-full rounded border border-blue-300 bg-white px-2 py-1.5 text-sm text-zinc-900 placeholder-zinc-400 dark:border-blue-700 dark:bg-zinc-800 dark:text-zinc-100"
+            className="mt-1 min-h-11 w-full rounded border border-blue-300 bg-white px-2 py-2 text-sm text-zinc-900 placeholder-zinc-400 dark:border-blue-700 dark:bg-zinc-800 dark:text-zinc-100"
           />
         </div>
 
@@ -125,7 +125,7 @@ export default function SubmissionForm({
           <select
             value={platform}
             onChange={(e) => setPlatform(e.target.value)}
-            className="mt-1 w-full rounded border border-blue-300 bg-white px-2 py-1.5 text-sm text-zinc-900 dark:border-blue-700 dark:bg-zinc-800 dark:text-zinc-100"
+            className="mt-1 min-h-11 w-full rounded border border-blue-300 bg-white px-2 py-2 text-sm text-zinc-900 dark:border-blue-700 dark:bg-zinc-800 dark:text-zinc-100"
           >
             {platformOptions.map((p) => (
               <option key={p} value={p}>
@@ -144,7 +144,7 @@ export default function SubmissionForm({
             onChange={(e) => setCaption(e.target.value)}
             placeholder="Aggiungi una descrizione..."
             maxLength={500}
-            className="mt-1 w-full rounded border border-blue-300 bg-white px-2 py-1.5 text-sm text-zinc-900 placeholder-zinc-400 dark:border-blue-700 dark:bg-zinc-800 dark:text-zinc-100"
+            className="mt-1 min-h-11 w-full rounded border border-blue-300 bg-white px-2 py-2 text-sm text-zinc-900 placeholder-zinc-400 dark:border-blue-700 dark:bg-zinc-800 dark:text-zinc-100"
             rows={2}
           />
           <p className="mt-1 text-xs text-blue-700 dark:text-blue-300">
@@ -156,14 +156,14 @@ export default function SubmissionForm({
           <button
             type="submit"
             disabled={submitting}
-            className="flex-1 rounded bg-blue-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-blue-700 disabled:opacity-50 dark:bg-blue-700 dark:hover:bg-blue-600"
+            className="min-h-11 flex-1 rounded bg-blue-600 px-3 py-2 text-xs font-semibold text-white hover:bg-blue-700 disabled:opacity-50 dark:bg-blue-700 dark:hover:bg-blue-600"
           >
             {submitting ? 'Invio...' : 'Invia'}
           </button>
           <button
             type="button"
             onClick={() => setIsOpen(false)}
-            className="flex-1 rounded border border-blue-300 px-3 py-1.5 text-xs font-semibold text-blue-900 hover:bg-blue-100 dark:border-blue-700 dark:text-blue-100 dark:hover:bg-blue-900"
+            className="min-h-11 flex-1 rounded border border-blue-300 px-3 py-2 text-xs font-semibold text-blue-900 hover:bg-blue-100 dark:border-blue-700 dark:text-blue-100 dark:hover:bg-blue-900"
           >
             Annulla
           </button>
