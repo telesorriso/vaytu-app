@@ -3,11 +3,28 @@
 :root {
   --background: #ffffff;
   --foreground: #171717;
+
+  /* -----------------------------------------------------------------------
+   * VAYTU semantic accents (Creator Home + future editorial/lifestyle UI).
+   * Used sparingly and only for their designated meaning — never as
+   * decorative color: gold = Vaytu Level / premium, green = verified /
+   * compatibility / success. See /app/creator/(home) for usage.
+   * --------------------------------------------------------------------- */
+  --vaytu-gold: #a9822f;
+  --vaytu-gold-soft: #f6efdd;
+  --vaytu-gold-foreground: #4a3a12;
+  --vaytu-green: #2f6b4f;
+  --vaytu-green-soft: #e6f2ea;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
+  --color-vaytu-gold: var(--vaytu-gold);
+  --color-vaytu-gold-soft: var(--vaytu-gold-soft);
+  --color-vaytu-gold-foreground: var(--vaytu-gold-foreground);
+  --color-vaytu-green: var(--vaytu-green);
+  --color-vaytu-green-soft: var(--vaytu-green-soft);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }
@@ -16,6 +33,11 @@
   :root {
     --background: #0a0a0a;
     --foreground: #ededed;
+    --vaytu-gold: #d4b567;
+    --vaytu-gold-soft: #2a2210;
+    --vaytu-gold-foreground: #f0e2b8;
+    --vaytu-green: #6fbf95;
+    --vaytu-green-soft: #10261b;
   }
 }
 

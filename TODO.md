@@ -107,22 +107,59 @@ Aggiornato: 2026-08-23. Ambito di questa sessione: **solo fase database**.
       WARN non collegato a queste migration (`auth_leaked_password_protection`
       — impostazione Auth del progetto, non toccata)
 
+- [x] Fix upload evidence (Step 4 Creator onboarding): la UI restava
+      indefinitamente in loading su "Carico gli screenshot..." senza mai
+      mostrare un errore — root cause: né `@supabase/storage-js`
+      (`.upload()`, che non accetta nemmeno un `AbortSignal`) né
+      `postgrest-js` applicano un timeout di default. `lib/actions/timeout.ts`
+      (`withTimeout`) avvolge ogni chiamata Storage/DB delle server action di
+      onboarding con un timeout di 20s: ogni fallimento produce ora un
+      errore visibile e un nuovo tentativo è sempre possibile. Nessuna
+      modifica a RLS/policy/bucket.
+- [x] **Merge in `main`**: PR #1 (`feature/onboarding-mvp` → `main`),
+      merge commit `f81686d`. Vedi report della fase per il dettaglio delle
+      verifiche pre-merge.
+
 ### Limitazioni note della fase 3
 
 - [ ] Test E2E completi (signup → onboarding → verifica admin → dashboard)
       contro Supabase reale — **NOT EXECUTED**, stesso blocco di rete della
       fase 2 (`*.supabase.co` non raggiungibile da questo sandbox)
-- [ ] Deploy Preview Netlify — **NOT EXECUTED**, connector non collegato
+- [x] Deploy Preview Netlify — generata automaticamente da GitHub/Netlify
+      sulla PR #1 (connector collegato), 4 check completati con successo
 - [ ] Autosave è a livello di "intero step" (debounced, tutti i campi testo
       dello step corrente), non per singolo campo isolato — scelta
       pragmatica, vedi report della fase
 - [ ] Nessuna UI per re-inviare la candidatura dopo un rifiuto (la pagina di
       stato mostra il motivo ma non riapre lo stepper) — rimandato
 
+## 🚧 Fase 4 — Creator Home UI (V1): in corso, su branch `feature/creator-home-ui`
+
+- [x] Nuova Creator Home mobile-first: profilo essenziale → Vaytu Level →
+      opportunità vicine/compatibili. Nessuna metrica (follower/engagement/
+      analytics) in Home per scelta di prodotto — resta nel sistema per
+      verifica/matching/Admin.
+- [x] Componenti: `CreatorHeader`, `CreatorProfileCard`, `VaytuLevelBadge`,
+      `OpportunityFilters`, `ExperienceCard`, `OpportunitiesSection`,
+      `EmptyOpportunities`, `CreatorBottomNav` (mobile), `CreatorSidebar`
+      (desktop) — in `components/creator-home/`
+- [x] Route group `app/creator/(home)/` (Scopri/Candidature/Messaggi/Profilo)
+      — separato da `app/creator/onboarding/**`, stesso guard server-side
+      (`requireRole` + stato submission/verifica) di prima, ora nel layout
+      condiviso del gruppo
+- [x] Dati demo Experiences (`lib/demo/experiences.ts`) — mock puro, mai
+      scritto su Supabase, nessuna nuova tabella/migration. Attivo solo fuori
+      da Netlify Production (`CONTEXT !== 'production'`); in produzione reale
+      mostra sempre l'empty state elegante
+- [ ] Merge in `main` — **NON ancora fatto**, in attesa di revisione visuale
+      mobile reale da parte dell'utente sulla Deploy Preview
+
 ## ⬜ Fasi successive (non iniziate — fuori scope di questa sessione)
 
-- [ ] Esperienze (creazione, candidature, collaborazioni) lato UI
-- [ ] UI/design completo
+- [ ] Esperienze reali (tabelle, creazione Business, candidature reali,
+      matching, collaborazioni) — Fase 4 è solo UI foundation, nessuno
+      schema toccato
+- [ ] Messaging reale, favorites reali, notifiche reali aggiuntive, mappe
 - [ ] Pagamenti
 - [ ] Integrazioni social (verifica automatica metriche, pubblicazione)
 - [ ] Reporting/analytics
