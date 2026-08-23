@@ -339,3 +339,54 @@ export async function getPublishedExperience(experienceId: string): Promise<Expe
     return null;
   }
 }
+
+/**
+ * Lists published experiences with their business names, for creator discovery.
+ * Returns experiences with businessName field populated.
+ */
+export async function listPublishedExperiencesWithBusinesses(): Promise<
+  (ExperienceRow & { businessName: string })[]
+> {
+  const user = await getAuthUser();
+  if (!user) return [];
+
+  const supabase = await createClient();
+
+  try {
+    // First get all published experiences
+    const { data: experiences } = await withTimeout(
+      supabase
+        .from('experiences')
+        .select('*')
+        .eq('status', 'published')
+        .is('deleted_at', null)
+        .order('created_at', { ascending: false }),
+      10_000
+    );
+
+    if (!experiences || experiences.length === 0) return [];
+
+    // Get unique business IDs
+    const businessIds = [...new Set((experiences as ExperienceRow[]).map((e) => e.business_id))];
+
+    // Fetch business profiles
+    const { data: businesses } = await withTimeout(
+      supabase.from('business_profiles').select('id, company_name').in('id', businessIds),
+      10_000
+    );
+
+    const businessMap = new Map(
+      (businesses ?? []).map((b: { id: string; company_name: string }) => [b.id, b.company_name])
+    );
+
+    // Combine experiences with business names
+    return (experiences as ExperienceRow[])
+      .map((exp) => ({
+        ...exp,
+        businessName: businessMap.get(exp.business_id) || 'Business',
+      }))
+      .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+  } catch {
+    return [];
+  }
+}
