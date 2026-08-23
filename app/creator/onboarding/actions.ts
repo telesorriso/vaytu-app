@@ -20,6 +20,7 @@ import {
 } from '@/lib/storage/paths';
 import { EVIDENCE_KINDS, type EvidenceKind } from '@/lib/db/types';
 import { ActionTimeoutError, withTimeout } from '@/lib/actions/timeout';
+import { toUserMessage } from '@/lib/actions/errors';
 
 export interface StepActionState {
   error?: string;
@@ -110,7 +111,7 @@ async function persistLocalita(
     .from('creator_profiles')
     .update({ city, niches })
     .eq('id', userId);
-  return error ? { error: error.message } : {};
+  return error ? { error: toUserMessage(error, 'onboarding') } : {};
 }
 
 export async function autosaveLocalita(values: {
@@ -180,7 +181,7 @@ async function persistSocial(
         .from('creator_metrics')
         .update({ followers_count: followers })
         .eq('id', existing.id);
-      if (error) return { error: error.message };
+      if (error) return { error: toUserMessage(error, 'onboarding') };
     } else {
       const { error } = await supabase.from('creator_metrics').insert({
         creator_id: userId,
@@ -189,7 +190,7 @@ async function persistSocial(
         source: 'self_reported',
         is_verified: false,
       });
-      if (error) return { error: error.message };
+      if (error) return { error: toUserMessage(error, 'onboarding') };
     }
   }
 
@@ -334,7 +335,7 @@ async function persistPortfolio(
     .from('creator_profiles')
     .update({ website_url: values.portfolioUrl.trim() || null })
     .eq('id', userId);
-  return error ? { error: error.message } : {};
+  return error ? { error: toUserMessage(error, 'onboarding') } : {};
 }
 
 export async function autosavePortfolio(values: {
@@ -375,7 +376,7 @@ export async function submitApplication(
     document_type: 'creator_application',
     status: 'pending',
   });
-  if (error) return { error: error.message };
+  if (error) return { error: toUserMessage(error, 'onboarding') };
 
   await supabase
     .from('creator_profiles')

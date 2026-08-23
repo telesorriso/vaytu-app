@@ -16,6 +16,7 @@ import {
   businessCoverPath,
 } from '@/lib/storage/paths';
 import { ActionTimeoutError, withTimeout } from '@/lib/actions/timeout';
+import { toUserMessage } from '@/lib/actions/errors';
 
 export interface StepActionState {
   error?: string;
@@ -38,7 +39,7 @@ async function persistIdentita(
     .from('business_profiles')
     .update({ company_name: companyName, industry })
     .eq('id', userId);
-  return error ? { error: error.message } : {};
+  return error ? { error: toUserMessage(error, 'onboarding') } : {};
 }
 
 export async function autosaveIdentita(values: {
@@ -100,7 +101,7 @@ async function persistLocalizzazione(
     .from('business_profiles')
     .update({ address, city })
     .eq('id', userId);
-  return error ? { error: error.message } : {};
+  return error ? { error: toUserMessage(error, 'onboarding') } : {};
 }
 
 export async function autosaveLocalizzazione(values: {
@@ -198,7 +199,7 @@ async function persistPresentazione(
     .from('business_profiles')
     .update({ description: values.description.trim() })
     .eq('id', userId);
-  return error ? { error: error.message } : {};
+  return error ? { error: toUserMessage(error, 'onboarding') } : {};
 }
 
 export async function autosavePresentazione(values: {
@@ -261,7 +262,7 @@ export async function submitApplication(
     document_type: 'business_application',
     status: 'pending',
   });
-  if (error) return { error: error.message };
+  if (error) return { error: toUserMessage(error, 'onboarding') };
 
   redirect('/business/onboarding/status');
 }

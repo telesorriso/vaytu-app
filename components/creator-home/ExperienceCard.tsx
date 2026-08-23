@@ -24,7 +24,6 @@ export interface ExperienceCardProps {
   benefit: string;
   /** Discrete chips (category first). Kept muted — not the visual focus. */
   tags: string[];
-  compatibilityPct: number;
   distanceLabel?: string;
   /** Real photo, once Experiences exist. Falls back to imageGradient when absent. */
   imageUrl?: string;
@@ -37,7 +36,6 @@ export function ExperienceCard({
   city,
   benefit,
   tags,
-  compatibilityPct,
   distanceLabel,
   imageUrl,
   imageGradient,
@@ -83,12 +81,6 @@ export function ExperienceCard({
           </svg>
         </button>
 
-        <span
-          className="absolute bottom-3 left-3 rounded-full px-2.5 py-1 text-xs font-semibold"
-          style={{ background: 'var(--vaytu-green-soft)', color: 'var(--vaytu-green)' }}
-        >
-          {compatibilityPct}% compatibile
-        </span>
       </div>
 
       <div className="space-y-1.5 p-3.5">

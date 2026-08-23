@@ -9,6 +9,7 @@ import {
   getExperienceDetail,
 } from '@/lib/experiences/data';
 import type { ExperienceStatus } from '@/lib/db/types';
+import { toUserMessage } from '@/lib/actions/errors';
 
 export interface ExperienceFormState {
   error?: string;
@@ -63,7 +64,7 @@ export async function submitCreateExperience(
     // Redirect to edit page
     redirect(`/business/experiences/${experience.id}`);
   } catch (err) {
-    const message = err instanceof Error ? err.message : 'Errore sconosciuto';
+    const message = toUserMessage(err);
     return { error: message };
   }
 }
@@ -120,7 +121,7 @@ export async function submitUpdateExperience(
 
     return { success: true };
   } catch (err) {
-    const message = err instanceof Error ? err.message : 'Errore sconosciuto';
+    const message = toUserMessage(err);
     return { error: message };
   }
 }
@@ -164,7 +165,7 @@ export async function submitChangeStatus(
 
     return { success: true };
   } catch (err) {
-    const message = err instanceof Error ? err.message : 'Errore sconosciuto';
+    const message = toUserMessage(err);
     return { error: message };
   }
 }

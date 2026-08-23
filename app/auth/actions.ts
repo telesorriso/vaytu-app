@@ -16,6 +16,7 @@
 import { redirect } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
 import { dashboardPathForRole, type AppRole } from '@/lib/auth/dal';
+import { toUserMessage } from '@/lib/actions/errors';
 
 export interface AuthActionState {
   error?: string;
@@ -107,7 +108,7 @@ export async function signup(
   });
 
   if (error) {
-    return { error: error.message };
+    return { error: toUserMessage(error, 'auth') };
   }
 
   if (!data.session) {

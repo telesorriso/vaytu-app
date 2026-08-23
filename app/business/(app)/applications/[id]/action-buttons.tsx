@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { updateApplicationStatus } from './actions';
+import { toUserMessage } from '@/lib/actions/errors';
 
 interface ActionButtonsProps {
   applicationId: string;
@@ -22,7 +23,7 @@ export function ActionButtons({ applicationId }: ActionButtonsProps) {
         setError(result.error);
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Errore sconosciuto');
+      setError(toUserMessage(err));
     } finally {
       setIsLoading(false);
     }
@@ -39,7 +40,7 @@ export function ActionButtons({ applicationId }: ActionButtonsProps) {
         setError(result.error);
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Errore sconosciuto');
+      setError(toUserMessage(err));
     } finally {
       setIsLoading(false);
     }

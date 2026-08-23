@@ -3,6 +3,7 @@
 import { redirect } from 'next/navigation';
 import { requireRole } from '@/lib/auth/dal';
 import { createApplication } from '@/lib/experiences/data';
+import { toUserMessage } from '@/lib/actions/errors';
 
 export interface ApplicationActionState {
   error?: string;
@@ -36,7 +37,7 @@ export async function submitApplication(
     // Redirect to a success or status page
     redirect('/creator/candidature');
   } catch (err) {
-    const message = err instanceof Error ? err.message : 'Errore sconosciuto';
+    const message = toUserMessage(err);
     return { error: message };
   }
 }

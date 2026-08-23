@@ -157,12 +157,6 @@ export default async function ProfiloPage() {
         </div>
       )}
 
-      <div className="rounded-2xl border border-dashed border-zinc-200 px-6 py-10 text-center dark:border-zinc-800">
-        <p className="text-sm text-zinc-500 dark:text-zinc-400">
-          Modifica profilo e impostazioni — presto disponibile.
-        </p>
-      </div>
-
       <form action={logout}>
         <button
           type="submit"
