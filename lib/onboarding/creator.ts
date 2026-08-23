@@ -3,6 +3,7 @@ import { cache } from 'react';
 import { redirect } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
 import { getAuthUser, requireRole } from '@/lib/auth/dal';
+import { withTimeout } from '@/lib/actions/timeout';
 import {
   EVIDENCE_KINDS,
   type CreatorProfileRow,
@@ -44,6 +45,7 @@ export interface CreatorOnboardingData {
  * Loads everything needed to render/resume the Creator onboarding flow, for
  * the CURRENTLY authenticated user only — every query below is scoped by
  * RLS to the caller's own rows regardless of what we ask for.
+ * All Supabase calls wrapped with timeout to prevent Edge Function hang.
  */
 export const getCreatorOnboardingData = cache(async (): Promise<CreatorOnboardingData | null> => {
   const user = await getAuthUser();
@@ -51,51 +53,66 @@ export const getCreatorOnboardingData = cache(async (): Promise<CreatorOnboardin
 
   const supabase = await createClient();
 
-  const [{ data: profile }, { data: creatorProfile }, { data: metrics }, { data: verifications }] =
-    await Promise.all([
-      supabase.from('profiles').select('*').eq('id', user.id).maybeSingle(),
-      supabase.from('creator_profiles').select('*').eq('id', user.id).maybeSingle(),
-      supabase
-        .from('creator_metrics')
-        .select('*')
-        .eq('creator_id', user.id)
-        .eq('platform', 'instagram')
-        .order('recorded_at', { ascending: false })
-        .limit(1),
-      supabase
-        .from('creator_verifications')
-        .select('*')
-        .eq('creator_id', user.id)
-        .order('submitted_at', { ascending: false }),
-    ]);
+  try {
+    const [{ data: profile }, { data: creatorProfile }, { data: metrics }, { data: verifications }] =
+      await Promise.all([
+        withTimeout(supabase.from('profiles').select('*').eq('id', user.id).maybeSingle(), 10_000),
+        withTimeout(supabase.from('creator_profiles').select('*').eq('id', user.id).maybeSingle(), 10_000),
+        withTimeout(
+          supabase
+            .from('creator_metrics')
+            .select('*')
+            .eq('creator_id', user.id)
+            .eq('platform', 'instagram')
+            .order('recorded_at', { ascending: false })
+            .limit(1),
+          10_000
+        ),
+        withTimeout(
+          supabase
+            .from('creator_verifications')
+            .select('*')
+            .eq('creator_id', user.id)
+            .order('submitted_at', { ascending: false }),
+          10_000
+        ),
+      ]);
 
-  if (!profile || !creatorProfile) return null;
+    if (!profile || !creatorProfile) return null;
 
-  const instagramMetric = (metrics?.[0] as CreatorMetricRow | undefined) ?? null;
+    const instagramMetric = (metrics?.[0] as CreatorMetricRow | undefined) ?? null;
 
-  let evidenceKinds = new Set<string>();
-  if (instagramMetric) {
-    const { data: evidence } = await supabase
-      .from('creator_metric_evidence')
-      .select('storage_path')
-      .eq('metric_id', instagramMetric.id);
-    evidenceKinds = new Set(
-      ((evidence as Pick<CreatorMetricEvidenceRow, 'storage_path'>[] | null) ?? [])
-        .map((e) => evidenceKindFromPath(e.storage_path))
-        .filter((k): k is string => !!k)
-    );
+    let evidenceKinds = new Set<string>();
+    if (instagramMetric) {
+      const { data: evidence } = await withTimeout(
+        supabase
+          .from('creator_metric_evidence')
+          .select('storage_path')
+          .eq('metric_id', instagramMetric.id),
+        10_000
+      );
+      evidenceKinds = new Set(
+        ((evidence as Pick<CreatorMetricEvidenceRow, 'storage_path'>[] | null) ?? [])
+          .map((e) => evidenceKindFromPath(e.storage_path))
+          .filter((k): k is string => !!k)
+      );
+    }
+
+    const latestVerification =
+      (verifications?.[0] as CreatorVerificationRow | undefined) ?? null;
+
+    return {
+      profile: profile as ProfileRow,
+      creatorProfile: creatorProfile as CreatorProfileRow,
+      instagramMetric,
+      evidenceKinds,
+      latestVerification,
+    };
+  } catch {
+    // Timeout during onboarding data fetch: return null to trigger redirect.
+    // This is safer than letting the page render in an incomplete state.
+    return null;
   }
-
-  const latestVerification =
-    (verifications?.[0] as CreatorVerificationRow | undefined) ?? null;
-
-  return {
-    profile: profile as ProfileRow,
-    creatorProfile: creatorProfile as CreatorProfileRow,
-    instagramMetric,
-    evidenceKinds,
-    latestVerification,
-  };
 });
 
 /** The first step whose prerequisites are NOT yet satisfied. */

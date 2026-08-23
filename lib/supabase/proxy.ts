@@ -20,6 +20,7 @@
 import { createServerClient } from '@supabase/ssr';
 import { NextResponse, type NextRequest } from 'next/server';
 import { supabaseAnonKey, supabaseUrl } from './env';
+import { withTimeout, ActionTimeoutError } from '@/lib/actions/timeout';
 
 const PRIVATE_PREFIXES = ['/creator', '/business', '/admin'];
 const AUTH_ONLY_PATHS = ['/login', '/signup'];
@@ -47,9 +48,22 @@ export async function updateSession(request: NextRequest) {
   // IMPORTANT: getUser() revalidates the token against Supabase Auth.
   // Do not replace with getSession() here — that only reads the (possibly
   // stale/forged-looking) local cookie without server-side verification.
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  // Wrapped with timeout to prevent Edge Function hang on network stall.
+  let user = null;
+  try {
+    const { data: { user: authUser } } = await withTimeout(supabase.auth.getUser(), 10_000);
+    user = authUser;
+  } catch (error) {
+    if (error instanceof ActionTimeoutError) {
+      // Timeout during auth refresh: fail-safe by treating as unauthenticated
+      // for the purpose of route gating. The session cookie is still set if
+      // it was already valid, so the request continues; if it was expired,
+      // we'll let the route handler catch it with requireRole().
+      user = null;
+    } else {
+      throw error;
+    }
+  }
 
   const { pathname } = request.nextUrl;
   const isPrivateRoute = PRIVATE_PREFIXES.some((p) => pathname.startsWith(p));

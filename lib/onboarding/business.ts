@@ -2,6 +2,7 @@ import 'server-only';
 import { redirect } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
 import { getAuthUser, requireRole } from '@/lib/auth/dal';
+import { withTimeout } from '@/lib/actions/timeout';
 import type {
   BusinessProfileRow,
   BusinessVerificationRow,
@@ -37,27 +38,35 @@ export async function getBusinessOnboardingData(): Promise<BusinessOnboardingDat
 
   const supabase = await createClient();
 
-  const [{ data: profile }, { data: businessProfile }, { data: verifications }] =
-    await Promise.all([
-      supabase.from('profiles').select('*').eq('id', user.id).maybeSingle(),
-      supabase.from('business_profiles').select('*').eq('id', user.id).maybeSingle(),
-      supabase
-        .from('business_verifications')
-        .select('*')
-        .eq('business_id', user.id)
-        .order('submitted_at', { ascending: false }),
-    ]);
+  try {
+    const [{ data: profile }, { data: businessProfile }, { data: verifications }] =
+      await Promise.all([
+        withTimeout(supabase.from('profiles').select('*').eq('id', user.id).maybeSingle(), 10_000),
+        withTimeout(supabase.from('business_profiles').select('*').eq('id', user.id).maybeSingle(), 10_000),
+        withTimeout(
+          supabase
+            .from('business_verifications')
+            .select('*')
+            .eq('business_id', user.id)
+            .order('submitted_at', { ascending: false }),
+          10_000
+        ),
+      ]);
 
-  if (!profile || !businessProfile) return null;
+    if (!profile || !businessProfile) return null;
 
-  const latestVerification =
-    (verifications?.[0] as BusinessVerificationRow | undefined) ?? null;
+    const latestVerification =
+      (verifications?.[0] as BusinessVerificationRow | undefined) ?? null;
 
-  return {
-    profile: profile as ProfileRow,
-    businessProfile: businessProfile as BusinessProfileRow,
-    latestVerification,
-  };
+    return {
+      profile: profile as ProfileRow,
+      businessProfile: businessProfile as BusinessProfileRow,
+      latestVerification,
+    };
+  } catch {
+    // Timeout during onboarding data fetch: return null to trigger redirect.
+    return null;
+  }
 }
 
 export function computeBusinessStep(data: BusinessOnboardingData): BusinessStep {

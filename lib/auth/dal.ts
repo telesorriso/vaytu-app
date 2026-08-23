@@ -19,6 +19,7 @@ import { cache } from 'react';
 import { redirect } from 'next/navigation';
 import type { User } from '@supabase/supabase-js';
 import { createClient } from '@/lib/supabase/server';
+import { withTimeout } from '@/lib/actions/timeout';
 
 export type AppRole = 'creator' | 'business' | 'admin';
 
@@ -37,15 +38,22 @@ export interface AuthProfile {
  *
  * Wrapped in React's cache() so multiple calls within one request/render
  * pass reuse the same result instead of re-hitting Supabase Auth.
+ * Also wrapped with timeout to prevent Edge Function hang on Supabase stall.
  */
 export const getAuthUser = cache(async (): Promise<User | null> => {
   const supabase = await createClient();
-  const {
-    data: { user },
-    error,
-  } = await supabase.auth.getUser();
-  if (error || !user) return null;
-  return user;
+  try {
+    const {
+      data: { user },
+      error,
+    } = await withTimeout(supabase.auth.getUser(), 10_000);
+    if (error || !user) return null;
+    return user;
+  } catch {
+    // Timeout or other error during auth fetch: treat as unauthenticated.
+    // This allows the route handler to redirect to login gracefully.
+    return null;
+  }
 });
 
 /**
@@ -53,20 +61,29 @@ export const getAuthUser = cache(async (): Promise<User | null> => {
  * unauthenticated or the profile row doesn't exist yet. Relies on the
  * profiles_select_self RLS policy — this function has no special
  * privilege, it can only ever see the caller's own row.
+ * Wrapped with timeout to prevent Edge Function hang on database stall.
  */
 export const getAuthProfile = cache(async (): Promise<AuthProfile | null> => {
   const user = await getAuthUser();
   if (!user) return null;
 
   const supabase = await createClient();
-  const { data, error } = await supabase
-    .from('profiles')
-    .select('id, role, full_name')
-    .eq('id', user.id)
-    .maybeSingle();
+  try {
+    const { data, error } = await withTimeout(
+      supabase
+        .from('profiles')
+        .select('id, role, full_name')
+        .eq('id', user.id)
+        .maybeSingle(),
+      10_000
+    );
 
-  if (error || !data) return null;
-  return { id: data.id, role: data.role as AppRole, fullName: data.full_name };
+    if (error || !data) return null;
+    return { id: data.id, role: data.role as AppRole, fullName: data.full_name };
+  } catch {
+    // Timeout or other error during profile fetch: treat as unauthenticated.
+    return null;
+  }
 });
 
 export function dashboardPathForRole(role: AppRole): string {
