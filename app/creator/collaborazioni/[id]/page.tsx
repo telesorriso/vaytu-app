@@ -9,6 +9,7 @@ import {
 } from '@/lib/collaborations/data';
 import { getReceivedReviews, getGivenReviews } from '@/lib/reviews/data';
 import CompletedCollaborationView from './completed';
+import SubmissionForm from './submission-form';
 
 interface CollaborationDetailPageProps {
   params: { id: string };
@@ -196,50 +197,52 @@ export default async function CollaborationDetailPage({
                 <h2 className="mb-4 text-lg font-semibold text-zinc-950 dark:text-zinc-50">
                   Deliverable richiesti
                 </h2>
-                <div className="space-y-3">
+                <div className="space-y-4">
                   {deliverables.map((d) => (
-                    <div
-                      key={d.id}
-                      className="flex items-start justify-between rounded-md border border-zinc-200 p-3 dark:border-zinc-700"
-                    >
-                      <div className="flex-1">
-                        <p className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">
-                          {d.deliverable_type
-                            .split('_')
-                            .map(
-                              (w) =>
-                                w.charAt(0).toUpperCase() + w.slice(1)
-                            )
-                            .join(' ')}
-                        </p>
-                        {d.description && (
-                          <p className="text-xs text-zinc-600 dark:text-zinc-400">
-                            {d.description}
+                    <div key={d.id} className="rounded-md border border-zinc-200 p-3 dark:border-zinc-700">
+                      <div className="flex items-start justify-between">
+                        <div className="flex-1">
+                          <p className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">
+                            {d.deliverable_type
+                              .split('_')
+                              .map(
+                                (w) =>
+                                  w.charAt(0).toUpperCase() + w.slice(1)
+                              )
+                              .join(' ')}
                           </p>
-                        )}
-                        {d.due_date && (
-                          <p className="mt-1 text-xs text-zinc-500 dark:text-zinc-500">
-                            Scadenza:{' '}
-                            {new Date(d.due_date).toLocaleDateString('it-IT')}
-                          </p>
-                        )}
-                      </div>
-                      <div
-                        className={`ml-2 inline-flex rounded-full px-2 py-1 text-xs font-medium ${
-                          d.status === 'approved'
-                            ? 'bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300'
+                          {d.description && (
+                            <p className="text-xs text-zinc-600 dark:text-zinc-400">
+                              {d.description}
+                            </p>
+                          )}
+                          {d.due_date && (
+                            <p className="mt-1 text-xs text-zinc-500 dark:text-zinc-500">
+                              Scadenza:{' '}
+                              {new Date(d.due_date).toLocaleDateString('it-IT')}
+                            </p>
+                          )}
+                        </div>
+                        <div
+                          className={`ml-2 inline-flex rounded-full px-2 py-1 text-xs font-medium ${
+                            d.status === 'approved'
+                              ? 'bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300'
+                              : d.status === 'submitted'
+                                ? 'bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300'
+                                : 'bg-zinc-100 text-zinc-700 dark:bg-zinc-800 dark:text-zinc-300'
+                          }`}
+                        >
+                          {d.status === 'approved'
+                            ? 'Approvato'
                             : d.status === 'submitted'
-                              ? 'bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300'
-                              : 'bg-zinc-100 text-zinc-700 dark:bg-zinc-800 dark:text-zinc-300'
-                        }`}
-                      >
-                        {d.status === 'approved'
-                          ? 'Approvato'
-                          : d.status === 'submitted'
-                            ? 'Inviato'
-                            : d.status.charAt(0).toUpperCase() +
-                              d.status.slice(1)}
+                              ? 'Inviato'
+                              : d.status.charAt(0).toUpperCase() +
+                                d.status.slice(1)}
+                        </div>
                       </div>
+                      {d.status !== 'approved' && (
+                        <SubmissionForm collaborationId={params.id} deliverable={d} />
+                      )}
                     </div>
                   ))}
                 </div>
