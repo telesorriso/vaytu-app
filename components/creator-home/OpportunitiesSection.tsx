@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 import { useMemo, useState } from 'react';
 import { OpportunityFilters, type OpportunityFilter } from './OpportunityFilters';
 import { ExperienceCard } from './ExperienceCard';
@@ -88,27 +89,32 @@ export function OpportunitiesSection({
                 />
               );
             } else {
-              // Real experience
+              // Real experience - wrap in Link for navigation
               const real = exp as ExperienceWithBusinessName;
               return (
-                <ExperienceCard
+                <Link
                   key={real.id}
-                  title={real.title}
-                  businessName={real.businessName || 'Business'}
-                  city={real.city || 'Luogo sconosciuto'}
-                  benefit={
-                    real.compensation_type === 'paid' && real.compensation_value
-                      ? `€${real.compensation_value}`
-                      : real.compensation_type
-                          .split('_')
-                          .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-                          .join(' ') || 'Esperienza'
-                  }
-                  tags={real.category ? [real.category] : []}
-                  compatibilityPct={75} // TODO: implement matching algorithm
-                  imageGradient="linear-gradient(135deg, #667eea 0%, #764ba2 100%)"
-                  imageUrl={undefined}
-                />
+                  href={`/creator/experiences/${real.id}`}
+                  className="hover:shadow-lg transition-shadow"
+                >
+                  <ExperienceCard
+                    title={real.title}
+                    businessName={real.businessName || 'Business'}
+                    city={real.city || 'Luogo sconosciuto'}
+                    benefit={
+                      real.compensation_type === 'paid' && real.compensation_value
+                        ? `€${real.compensation_value}`
+                        : real.compensation_type
+                            .split('_')
+                            .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+                            .join(' ') || 'Esperienza'
+                    }
+                    tags={real.category ? [real.category] : []}
+                    compatibilityPct={75} // TODO: implement matching algorithm
+                    imageGradient="linear-gradient(135deg, #667eea 0%, #764ba2 100%)"
+                    imageUrl={undefined}
+                  />
+                </Link>
               );
             }
           })}
