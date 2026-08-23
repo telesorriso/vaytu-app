@@ -1,7 +1,7 @@
 'use client';
 
 import { useActionState } from 'react';
-import { Field, TextInput, SubmitButton, ErrorBanner } from '@/components/form-controls';
+import { Field, SubmitButton, ErrorBanner } from '@/components/form-controls';
 import { submitApplication, type ApplicationActionState } from './actions';
 
 interface ApplicationFormProps {

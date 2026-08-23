@@ -32,7 +32,7 @@ export default async function ApplyPage({ params }: ApplyPageProps) {
       {/* Header */}
       <div>
         <h1 className="text-3xl font-bold text-zinc-950 dark:text-zinc-50">
-          Candidati a "{experience.title}"
+          Candidati a &quot;{experience.title}&quot;
         </h1>
         <p className="mt-2 text-zinc-600 dark:text-zinc-400">
           Compila il modulo per candidarti. Riceverai una notifica quando il business avrà

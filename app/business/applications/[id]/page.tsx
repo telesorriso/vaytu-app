@@ -49,7 +49,7 @@ export default async function ApplicationDetailPage({ params }: ApplicationDetai
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-3xl font-bold text-zinc-950 dark:text-zinc-50">
-            Candidatura a "{experience.title}"
+            Candidatura a &quot;{experience.title}&quot;
           </h1>
           <div className="mt-2 flex items-center gap-2">
             <span
