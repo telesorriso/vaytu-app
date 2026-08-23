@@ -27,10 +27,14 @@ export interface DemoExperience {
   city: string;
   category: DemoExperienceCategory;
   categoryLabel: string;
+  /** One short line — the actual offer, shown on the card ("Cena per 2 persone"). */
+  benefit: string;
   valueEur: number;
   tags: string[];
   compatibilityPct: number;
   spotsLeft: number;
+  /** Real photo URL, once Experiences exist — none of the demo items set this yet. */
+  imageUrl?: string;
   /** CSS gradient used as a photograph stand-in — no external image host. */
   imageGradient: string;
 }
@@ -43,8 +47,9 @@ export const DEMO_EXPERIENCES: DemoExperience[] = [
     city: 'Milano',
     category: 'food',
     categoryLabel: 'Food',
+    benefit: 'Cena per 2 persone',
     valueEur: 120,
-    tags: ['Food', 'Cena'],
+    tags: ['Cena'],
     compatibilityPct: 92,
     spotsLeft: 2,
     imageGradient: 'linear-gradient(135deg, #e9ddc8 0%, #c9a35f 55%, #a9822f 100%)',
@@ -56,8 +61,9 @@ export const DEMO_EXPERIENCES: DemoExperience[] = [
     city: 'Milano',
     category: 'wellness',
     categoryLabel: 'Wellness',
+    benefit: 'Percorso spa per 1 persona',
     valueEur: 90,
-    tags: ['Wellness', 'Relax'],
+    tags: ['Relax'],
     compatibilityPct: 87,
     spotsLeft: 3,
     imageGradient: 'linear-gradient(135deg, #e3ede8 0%, #a9c6b8 55%, #6f9c85 100%)',
@@ -69,8 +75,9 @@ export const DEMO_EXPERIENCES: DemoExperience[] = [
     city: 'Milano',
     category: 'lifestyle',
     categoryLabel: 'Lifestyle',
+    benefit: 'Personal shopper incluso',
     valueEur: 150,
-    tags: ['Lifestyle', 'Shopping'],
+    tags: ['Shopping'],
     compatibilityPct: 78,
     spotsLeft: 1,
     imageGradient: 'linear-gradient(135deg, #efe2ea 0%, #cba7bd 55%, #9c6f8c 100%)',

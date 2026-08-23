@@ -36,10 +36,15 @@ export default async function CreatorHomeLayout({ children }: { children: ReactN
   return (
     <div className="flex min-h-screen w-full bg-zinc-50 dark:bg-black">
       <CreatorSidebar />
-      <div className="flex min-h-screen flex-1 flex-col">
+      {/* min-w-0: without it, a flex item defaults to min-width:auto and refuses
+          to shrink below its content's intrinsic width — which defeats the
+          horizontally-scrolling OpportunityFilters row further down (its
+          natural, unwrapped width would otherwise blow out this whole column,
+          and with it the page, past the viewport on mobile). */}
+      <div className="flex min-h-screen min-w-0 flex-1 flex-col">
         <CreatorHeader avatarUrl={data.profile.avatar_url} fullName={data.profile.full_name} />
-        <main className="flex-1 pb-20 md:pb-10">
-          <div className="mx-auto w-full max-w-5xl px-4 py-5">{children}</div>
+        <main className="min-w-0 flex-1 pb-24 md:pb-10">
+          <div className="mx-auto w-full max-w-5xl px-4 py-3.5 md:py-6">{children}</div>
         </main>
       </div>
       <CreatorBottomNav />

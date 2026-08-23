@@ -13,18 +13,18 @@ export function CreatorHeader({ avatarUrl, fullName }: { avatarUrl: string | nul
   const initial = fullName.trim().charAt(0).toUpperCase() || '?';
 
   return (
-    <header className="sticky top-0 z-20 flex items-center justify-between border-b border-zinc-100 bg-white/90 px-4 py-3 backdrop-blur-sm dark:border-zinc-900 dark:bg-black/90">
-      <span className="text-lg font-semibold tracking-tight text-zinc-950 dark:text-zinc-50">
+    <header className="sticky top-0 z-20 flex items-center justify-between border-b border-zinc-100 bg-white/90 px-4 py-2.5 backdrop-blur-sm dark:border-zinc-900 dark:bg-black/90">
+      <span className="text-base font-semibold tracking-tight text-zinc-950 dark:text-zinc-50">
         VAYTU
       </span>
 
-      <div className="flex items-center gap-3">
+      <div className="flex items-center gap-2.5">
         <span
           aria-hidden="true"
-          className="flex h-9 w-9 items-center justify-center rounded-full text-zinc-400 dark:text-zinc-500"
+          className="flex h-8 w-8 items-center justify-center rounded-full text-zinc-400 dark:text-zinc-500"
           title="Notifiche"
         >
-          <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="1.6">
+          <svg viewBox="0 0 24 24" className="h-[18px] w-[18px]" fill="none" stroke="currentColor" strokeWidth="1.6">
             <path
               strokeLinecap="round"
               strokeLinejoin="round"
@@ -37,7 +37,7 @@ export function CreatorHeader({ avatarUrl, fullName }: { avatarUrl: string | nul
         <Link
           href="/creator/profilo"
           aria-label="Profilo"
-          className="flex h-9 w-9 items-center justify-center overflow-hidden rounded-full border border-zinc-200 bg-zinc-100 text-sm font-medium text-zinc-600 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-300"
+          className="flex h-8 w-8 items-center justify-center overflow-hidden rounded-full border border-zinc-200 bg-zinc-100 text-xs font-medium text-zinc-600 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-300"
         >
           {avatarUrl ? (
             // eslint-disable-next-line @next/next/no-img-element -- small avatar, no next/image remotePatterns configured for this phase

@@ -24,8 +24,8 @@ export function CreatorProfileCard({
   const initial = fullName.trim().charAt(0).toUpperCase() || '?';
 
   return (
-    <section className="flex items-center gap-4 rounded-2xl border border-zinc-100 bg-white px-4 py-4 shadow-[0_1px_2px_rgba(0,0,0,0.04)] dark:border-zinc-900 dark:bg-zinc-950">
-      <div className="flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden rounded-full border border-zinc-200 bg-zinc-100 text-lg font-medium text-zinc-600 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-300">
+    <section className="flex items-center gap-3 rounded-2xl border border-zinc-100 bg-white px-3.5 py-3 shadow-[0_1px_2px_rgba(0,0,0,0.04)] dark:border-zinc-900 dark:bg-zinc-950">
+      <div className="flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-full border border-zinc-200 bg-zinc-100 text-base font-medium text-zinc-600 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-300">
         {avatarUrl ? (
           // eslint-disable-next-line @next/next/no-img-element -- no next/image remotePatterns configured for this phase
           <img src={avatarUrl} alt="" className="h-full w-full object-cover" />
@@ -34,7 +34,7 @@ export function CreatorProfileCard({
         )}
       </div>
 
-      <div className="min-w-0 flex-1 space-y-1.5">
+      <div className="min-w-0 flex-1 space-y-1">
         <div className="flex flex-wrap items-center gap-1.5">
           <h2 className="truncate text-base font-semibold text-zinc-950 dark:text-zinc-50">
             {fullName}

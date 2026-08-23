@@ -27,9 +27,9 @@ export default async function CreatorHomePage() {
   const firstName = profile.full_name.trim().split(/\s+/)[0] || profile.full_name;
 
   return (
-    <div className="space-y-6">
-      <div className="space-y-1">
-        <h1 className="text-2xl font-semibold text-zinc-950 dark:text-zinc-50">
+    <div className="space-y-3.5 md:space-y-5">
+      <div className="space-y-0.5">
+        <h1 className="text-xl font-semibold text-zinc-950 md:text-2xl dark:text-zinc-50">
           Ciao, {firstName} 👋
         </h1>
         <p className="text-sm text-zinc-500 dark:text-zinc-400">

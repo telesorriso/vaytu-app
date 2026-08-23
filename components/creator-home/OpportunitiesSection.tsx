@@ -33,8 +33,8 @@ export function OpportunitiesSection({ experiences }: { experiences: DemoExperie
   }, [experiences, active]);
 
   return (
-    <section className="space-y-4">
-      <div className="space-y-1">
+    <section className="space-y-3">
+      <div className="space-y-0.5">
         <h2 className="text-lg font-semibold text-zinc-950 dark:text-zinc-50">Opportunità per te</h2>
         <p className="text-sm text-zinc-500 dark:text-zinc-400">
           Experiences selezionate in base al tuo profilo.
@@ -53,12 +53,11 @@ export function OpportunitiesSection({ experiences }: { experiences: DemoExperie
               title={exp.title}
               businessName={exp.businessName}
               city={exp.city}
-              categoryLabel={exp.categoryLabel}
-              tags={exp.tags}
-              valueEur={exp.valueEur}
+              benefit={exp.benefit}
+              tags={[exp.categoryLabel, ...exp.tags.filter((tag) => tag !== exp.categoryLabel)]}
               compatibilityPct={exp.compatibilityPct}
-              spotsLeft={exp.spotsLeft}
               imageGradient={exp.imageGradient}
+              imageUrl={exp.imageUrl}
             />
           ))}
         </div>
