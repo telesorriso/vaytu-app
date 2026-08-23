@@ -9,6 +9,7 @@ import type {
   ExperienceStatus,
   CompensationType,
   ApplicationRow,
+  ApplicationStatus,
 } from '@/lib/db/types';
 
 /**
@@ -393,6 +394,82 @@ export async function listPublishedExperiencesWithBusinesses(): Promise<
 }
 
 /**
+ * Gets all applications for a specific business.
+ * Only returns applications to the authenticated business's own experiences.
+ */
+export async function getBusinessApplications(): Promise<ApplicationRow[]> {
+  const user = await getAuthUser();
+  if (!user) return [];
+
+  const supabase = await createClient();
+
+  try {
+    const { data } = await withTimeout(
+      supabase
+        .from('applications')
+        .select('*')
+        .eq('business_id', user.id)
+        .order('created_at', { ascending: false }),
+      10_000
+    );
+    return (data as ApplicationRow[]) ?? [];
+  } catch {
+    return [];
+  }
+}
+
+/**
+ * Gets a single application with creator profile info.
+ */
+export async function getApplicationDetail(applicationId: string): Promise<
+  (ApplicationRow & {
+    creatorProfile?: {
+      display_name: string;
+      avatar_url: string | null;
+      city: string | null;
+      niches: string[];
+    };
+  }) | null
+> {
+  const user = await getAuthUser();
+  if (!user) return null;
+
+  const supabase = await createClient();
+
+  try {
+    // Get the application
+    const { data: app } = await withTimeout(
+      supabase
+        .from('applications')
+        .select('*')
+        .eq('id', applicationId)
+        .eq('business_id', user.id)
+        .maybeSingle(),
+      10_000
+    );
+
+    if (!app) return null;
+
+    // Get creator profile
+    const { data: creator } = await withTimeout(
+      supabase
+        .from('creator_profiles')
+        .select('display_name, avatar_url, city, niches')
+        .eq('id', (app as ApplicationRow).creator_id)
+        .maybeSingle(),
+      10_000
+    );
+
+    return {
+      ...(app as ApplicationRow),
+      creatorProfile: creator || undefined,
+    };
+  } catch {
+    return null;
+  }
+}
+
+/**
  * Creates an application (candidatura) from a creator to an experience.
  * The creator_id is taken from the authenticated user.
  * The business_id and status are set from the experience and default 'pending'.
@@ -432,5 +509,42 @@ export async function createApplication(
     return data as ApplicationRow;
   } catch {
     return null;
+  }
+}
+
+/**
+ * Updates an application status (accept/reject).
+ * Only the business that received the application can update it.
+ * When status changes to 'accepted', the trigger fn_create_collaboration_on_acceptance
+ * automatically creates a Collaboration record.
+ */
+export async function updateApplicationStatus(
+  applicationId: string,
+  status: ApplicationStatus
+): Promise<{ success?: boolean; error?: string }> {
+  const user = await getAuthUser();
+  if (!user) return { error: 'Non autenticato' };
+
+  const supabase = await createClient();
+
+  try {
+    const { error } = await withTimeout(
+      supabase
+        .from('applications')
+        .update({
+          status,
+          decided_at: new Date().toISOString(),
+          decided_by: user.id,
+        })
+        .eq('id', applicationId)
+        .eq('business_id', user.id),
+      10_000
+    );
+
+    if (error) return { error: error.message };
+    return { success: true };
+  } catch (err) {
+    const message = err instanceof Error ? err.message : 'Errore sconosciuto';
+    return { error: message };
   }
 }
