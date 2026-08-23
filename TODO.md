@@ -97,11 +97,18 @@ Aggiornato: 2026-08-23. Ambito di questa sessione: **solo fase database**.
       rotte, incluse le sotto-rotte onboarding/admin
 - [x] `netlify.toml` pronto; deploy Netlify **non attivabile** in questa
       sessione (connector Netlify non collegato all'org)
+- [x] Migration 007, 008, 009 **applicate e verificate sul progetto Supabase
+      hosted** (`jkyqxqqvqbmjfufsktgp`): schema drift zero (20 tabelle,
+      20/20 RLS, 113 policy pubbliche, 31 trigger — tutti invariati), 2
+      bucket Storage creati (`public-assets` pubblico, `verification-evidence`
+      privato) con 7 policy verificate riga per riga, 4 Vaytu Level seminati
+      (Explorer/Insider/Select/Icon). Security advisor: 0 ERROR, stessi 8
+      WARN pre-esistenti (helper RLS intenzionalmente pubbliche) + 1 nuovo
+      WARN non collegato a queste migration (`auth_leaked_password_protection`
+      — impostazione Auth del progetto, non toccata)
 
 ### Limitazioni note della fase 3
 
-- [ ] Migration 007-009 **non applicate** al progetto Supabase hosted —
-      serve riabilitare il connector Supabase per questa chat
 - [ ] Test E2E completi (signup → onboarding → verifica admin → dashboard)
       contro Supabase reale — **NOT EXECUTED**, stesso blocco di rete della
       fase 2 (`*.supabase.co` non raggiungibile da questo sandbox)
