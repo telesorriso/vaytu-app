@@ -419,6 +419,75 @@ export async function getBusinessApplications(): Promise<ApplicationRow[]> {
 }
 
 /**
+ * Lists all applications for the authenticated creator user.
+ * Returns applications with experience and business profile info.
+ * Uses RLS to ensure only the creator's own applications are returned.
+ */
+export async function getCreatorApplications(): Promise<
+  (ApplicationRow & {
+    experienceTitle?: string;
+    businessName?: string;
+  })[]
+> {
+  const user = await getAuthUser();
+  if (!user) return [];
+
+  const supabase = await createClient();
+
+  try {
+    const { data } = await withTimeout(
+      supabase
+        .from('applications')
+        .select('*')
+        .eq('creator_id', user.id)
+        .order('created_at', { ascending: false }),
+      10_000
+    );
+
+    if (!data) return [];
+
+    // Enrich with experience and business info
+    const enriched = await Promise.all(
+      (data as ApplicationRow[]).map(async (app) => {
+        try {
+          // Get experience title
+          const { data: exp } = await withTimeout(
+            supabase
+              .from('experiences')
+              .select('title')
+              .eq('id', app.experience_id)
+              .maybeSingle(),
+            10_000
+          );
+
+          // Get business name
+          const { data: biz } = await withTimeout(
+            supabase
+              .from('business_profiles')
+              .select('company_name')
+              .eq('id', app.business_id)
+              .maybeSingle(),
+            10_000
+          );
+
+          return {
+            ...app,
+            experienceTitle: exp?.title,
+            businessName: biz?.company_name,
+          };
+        } catch {
+          return app;
+        }
+      })
+    );
+
+    return enriched;
+  } catch {
+    return [];
+  }
+}
+
+/**
  * Gets a single application with creator profile info.
  */
 export async function getApplicationDetail(applicationId: string): Promise<
@@ -473,6 +542,7 @@ export async function getApplicationDetail(applicationId: string): Promise<
  * Creates an application (candidatura) from a creator to an experience.
  * The creator_id is taken from the authenticated user.
  * The business_id and status are set from the experience and default 'pending'.
+ * Prevents duplicate applications: a creator cannot apply twice to the same experience.
  */
 export async function createApplication(
   experienceId: string,
@@ -487,6 +557,22 @@ export async function createApplication(
     // First, get the experience to know the business_id
     const experience = await getExperienceDetail(experienceId);
     if (!experience) return null;
+
+    // Check for existing application from this creator to this experience
+    const { data: existingApps } = await withTimeout(
+      supabase
+        .from('applications')
+        .select('id')
+        .eq('experience_id', experienceId)
+        .eq('creator_id', user.id)
+        .in('status', ['pending', 'accepted']),
+      10_000
+    );
+
+    if (existingApps && existingApps.length > 0) {
+      // Creator has already applied to this experience
+      return null;
+    }
 
     // Create the application
     const { data, error } = await withTimeout(
