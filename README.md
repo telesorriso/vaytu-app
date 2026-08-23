@@ -8,20 +8,37 @@ Questo repository è l'unica fonte ufficiale del codice di VAYTU.
 
 ## Stato del progetto
 
-🚧 **Fase attuale: DATABASE (MVP).** Solo lo schema PostgreSQL/Supabase è
-stato realizzato. Frontend, UI, pagamenti e integrazioni social **non sono
+🚧 **Fase attuale: APPLICATION FOUNDATION.** Database (fase 1) e scheletro
+applicativo Next.js + Supabase Auth (fase 2) sono completati. Onboarding,
+Esperienze, pagamenti, integrazioni social e design completo **non sono
 ancora stati iniziati** — vedi `/PROJECT.md` e `/TODO.md`.
 
 ## Struttura del repository
 
 ```
-/supabase/migrations/   Migration SQL canoniche (001 -> 004)
-/tests/integration/      Harness di test RLS eseguito realmente (PostgreSQL locale)
-/docs/                    Documentazione tecnica
-  DATABASE.md             Schema, entità, come eseguire migration e test
-  SECURITY_MODEL.md        Modello di sicurezza, ruoli, RLS, colonne protette
-PROJECT.md                Visione di prodotto e roadmap per fasi
-TODO.md                   Stato di avanzamento dettagliato
+/app/                     Rotte Next.js (App Router): /, /login, /signup, /creator, /business, /admin
+/lib/supabase/             Client Supabase (browser, server, sessione per proxy.ts)
+/lib/auth/                 Data Access Layer — verifica ruolo server-side (RLS come ultimo livello)
+proxy.ts                   Refresh sessione + redirect ottimistico (Next.js 16, ex "middleware.ts")
+/supabase/migrations/     Migration SQL canoniche (001 -> 006)
+/tests/integration/        Harness di test RLS eseguito realmente (PostgreSQL locale)
+/docs/                     Documentazione tecnica
+  DATABASE.md              Schema, entità, come eseguire migration e test
+  SECURITY_MODEL.md         Modello di sicurezza, ruoli, RLS, colonne protette
+PROJECT.md                 Visione di prodotto e roadmap per fasi
+TODO.md                    Stato di avanzamento dettagliato
+.env.example                Variabili d'ambiente pubbliche richieste (nessun secret)
+```
+
+## Avvio rapido (applicazione)
+
+```bash
+npm install
+cp .env.example .env.local   # compila con URL + anon key del progetto Supabase (vedi .env.example)
+npm run dev
+npm run build      # build di produzione
+npm run lint       # ESLint
+npm run typecheck  # tsc --noEmit
 ```
 
 ## Requisiti

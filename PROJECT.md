@@ -30,21 +30,26 @@ Il modello di sicurezza completo (chi vede/modifica cosa) è in
 
 ## Roadmap per fasi
 
-Ogni fase è un blocco di lavoro separato. **Questa sessione ha coperto
-esclusivamente la fase 1.**
+Ogni fase è un blocco di lavoro separato.
 
 1. ✅ **Database (MVP)** — schema PostgreSQL/Supabase, RLS, migration
-   canoniche, test RLS eseguiti realmente. *(questa sessione)*
-2. ⬜ **Backend/API** — non iniziato
-3. ⬜ **Frontend/UI** — non iniziato
-4. ⬜ **Autenticazione/onboarding applicativo** — non iniziato (solo lo
-   schema dati è pronto: `profiles`, `creator_profiles`,
-   `business_profiles`)
+   canoniche, test RLS eseguiti realmente.
+2. ✅ **Application Foundation** — scheletro Next.js 16 + TypeScript +
+   Tailwind + Supabase (`@supabase/supabase-js`, `@supabase/ssr`), sessione
+   cookie-based, `proxy.ts` + Data Access Layer per l'autorizzazione
+   server-side reale, rotte `/`, `/login`, `/signup`, `/creator`,
+   `/business`, `/admin` con dashboard minimali. **Nessun onboarding,
+   Esperienze, file upload o design completo.**
+3. ⬜ **Onboarding applicativo completo** — non iniziato (bio, niches,
+   verifica documenti — lo schema dati è pronto)
+4. ⬜ **Esperienze** (creazione, candidature, collaborazioni) lato UI — non
+   iniziato
 5. ⬜ **Pagamenti** — non iniziato
 6. ⬜ **Integrazioni social** (verifica automatica metriche, pubblicazione
    contenuti) — non iniziato
-7. ⬜ **Moderazione/admin panel** — non iniziato (solo lo schema dati è
-   pronto: `admin_notes`, `*_verifications`, `audit_log`)
+7. ⬜ **Moderazione/admin panel** (funzioni amministrative oltre al login)
+   — non iniziato (solo lo schema dati è pronto: `admin_notes`,
+   `*_verifications`, `audit_log`)
 
 Non procedere alle fasi successive senza indicazione esplicita.
 
@@ -56,3 +61,12 @@ profili (Creator/Business), metriche social e relativa evidence privata,
 verifiche identità/azienda, il sistema di Vaytu Level, experience e loro
 slot/immagini, il ciclo candidatura → collaborazione → deliverable →
 content submission → metriche → review, notifiche, note admin e audit log.
+
+## Cosa esiste già a livello applicativo (fase 2)
+
+Un'app Next.js funzionante alla radice del repository (vedi
+`package.json`, `app/`, `lib/`). Autenticazione via Supabase Auth
+(email+password), sessione gestita via cookie da `@supabase/ssr`,
+autorizzazione per ruolo verificata **server-side** in ogni rotta protetta
+(`lib/auth/dal.ts`), con RLS come ultimo livello di difesa. Nessuna UI di
+prodotto oltre alle dashboard minimali.

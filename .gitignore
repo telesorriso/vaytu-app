@@ -12,12 +12,16 @@
 supabase/.branches/
 supabase/.temp/
 
-# --- Node / future frontend (kept ignored even though not started yet) ---
+# --- Node / Next.js app ---
 node_modules/
 dist/
 build/
 .next/
+out/
 coverage/
+.vercel/
+*.tsbuildinfo
+next-env.d.ts
 
 # --- OS / editor ---
 .DS_Store
