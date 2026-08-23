@@ -63,7 +63,7 @@ export function ExperienceCard({
           onClick={() => setFavorite((v) => !v)}
           aria-pressed={favorite}
           aria-label={favorite ? 'Rimuovi dai preferiti' : 'Aggiungi ai preferiti'}
-          className="absolute right-3 top-3 flex h-9 w-9 items-center justify-center rounded-full bg-white/90 text-zinc-700 shadow-sm backdrop-blur-sm dark:bg-black/60 dark:text-zinc-200"
+          className="absolute right-3 top-3 flex h-11 w-11 items-center justify-center rounded-full bg-white/90 text-zinc-700 shadow-sm backdrop-blur-sm dark:bg-black/60 dark:text-zinc-200"
         >
           <svg
             viewBox="0 0 24 24"

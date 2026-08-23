@@ -34,7 +34,7 @@ $PSQL -d "$DB_NAME" -f "$SCRIPT_DIR/00_bootstrap_local_auth_emulation.sql"
 echo "== [3/4] Applying canonical migrations (001 -> 004) =="
 for f in 001_init_enums.sql 002_create_tables.sql 003_indexes_constraints_triggers.sql 004_rls_policies.sql \
          005_security_hardening.sql 006_revoke_public_execute_fix.sql 007_onboarding_profile_fields.sql \
-         009_seed_creator_levels.sql; do
+         009_seed_creator_levels.sql 010_collaboration_update_hardening.sql; do
   # 008_onboarding_storage_buckets.sql is NOT run here: it targets Supabase's
   # `storage` schema, which only exists on the real hosted platform, not on
   # a vanilla local PostgreSQL instance.

@@ -14,13 +14,18 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: "VAYTU",
-  description: "VAYTU — Application foundation (fase pre-onboarding)",
+  // Was "Application foundation (fase pre-onboarding)" — internal development
+  // status, and this string is what search results and link previews show.
+  description:
+    "VAYTU mette in contatto Creator e attività locali attraverso Experience e collaborazioni reali.",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html
-      lang="en"
+      // The entire interface is Italian; lang="en" made screen readers
+      // pronounce it with English phonetics.
+      lang="it"
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">{children}</body>

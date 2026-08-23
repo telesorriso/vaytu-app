@@ -190,29 +190,80 @@ select testing.expect_denied(
        where id = '55555555-aaaa-0000-0000-000000000001'$q$
 );
 
--- KNOWN MVP LIMITATION, asserted here so it cannot change unnoticed.
+-- COLLABORATION UPDATE AUTHORIZATION (migration 010)
 --
--- collaborations_update_participant (004_rls_policies.sql) deliberately lets
--- EITHER participant move the status: "a finer-grained state machine is left
--- for a future iteration". So at the database level a Creator CAN change their
--- own collaboration's status, including to 'completed' — which would fire
--- fn_on_collaboration_completed and inflate their own
--- completed_collaborations_count.
---
--- This test records the real behaviour rather than the behaviour we would
--- prefer. The application-level mitigation lives in updateCollaborationStatus(),
--- which scopes the write to business_id = auth.uid(), so the Vaytu UI never
--- offers this to a Creator; the exposure is only reachable by calling the API
--- directly. Tightening the policy is an RLS change and therefore out of scope
--- for this milestone — see the Post-Collaboration report, Remaining blockers.
---
--- Writing 'active' (the value it would already move to) keeps the fixture
--- usable for the assertions that follow.
-select testing.expect_allowed_write(
-  'creator_B',
-  'completion: KNOWN LIMITATION - RLS still lets a participant creator change collaboration status',
+-- Before 010, collaborations_update_participant let EITHER participant update
+-- the row. Verified against real PostgreSQL, a Creator could self-complete
+-- (inflating their own completed_collaborations_count from 1 to 2) and could
+-- repoint business_id and experience_id into another tenant, because the
+-- WITH CHECK passed as long as creator_id still matched. 010 replaces that
+-- policy with an owner-only one and adds a column/terminal-state guard.
+
+-- A Creator no longer has UPDATE on collaborations at all.
+select testing.expect_denied(
+  'creator_B', 'collab update: creator cannot self-complete a collaboration',
   $q$update public.collaborations
-       set status = 'active'
+       set status = 'completed'
+       where application_id = '33333333-aaaa-0000-0000-000000000002'$q$
+);
+
+select testing.expect_denied(
+  'creator_B', 'collab update: creator cannot cancel a collaboration',
+  $q$update public.collaborations
+       set status = 'cancelled'
+       where application_id = '33333333-aaaa-0000-0000-000000000002'$q$
+);
+
+select testing.expect_denied(
+  'creator_B', 'collab update: creator cannot set a collaboration to disputed',
+  $q$update public.collaborations
+       set status = 'disputed'
+       where application_id = '33333333-aaaa-0000-0000-000000000002'$q$
+);
+
+-- The identity columns. business_id and experience_id were the two that
+-- actually succeeded before 010, so these are regression tests for a proven
+-- exploit, not hypotheticals.
+select testing.expect_denied(
+  'creator_B', 'collab update: creator cannot repoint business_id to another tenant',
+  $q$update public.collaborations
+       set business_id = '44444444-4444-4444-4444-444444444444'
+       where application_id = '33333333-aaaa-0000-0000-000000000002'$q$
+);
+
+select testing.expect_denied(
+  'creator_B', 'collab update: creator cannot repoint experience_id',
+  $q$update public.collaborations
+       set experience_id = 'ffffffff-0000-0000-0000-000000000001'
+       where application_id = '33333333-aaaa-0000-0000-000000000002'$q$
+);
+
+select testing.expect_denied(
+  'creator_B', 'collab update: creator cannot repoint creator_id',
+  $q$update public.collaborations
+       set creator_id = '22222222-2222-2222-2222-222222222222'
+       where application_id = '33333333-aaaa-0000-0000-000000000002'$q$
+);
+
+select testing.expect_denied(
+  'creator_B', 'collab update: creator cannot repoint application_id',
+  $q$update public.collaborations
+       set application_id = '33333333-aaaa-0000-0000-000000000001'
+       where application_id = '33333333-aaaa-0000-0000-000000000002'$q$
+);
+
+-- A Creator must not be able to forge a collaboration either: INSERT is
+-- admin-only, rows are created by fn_create_collaboration_on_acceptance.
+select testing.expect_denied(
+  'creator_B', 'collab insert: creator cannot create a collaboration from the client',
+  $q$insert into public.collaborations (application_id, experience_id, creator_id, business_id, status)
+     values ('33333333-aaaa-0000-0000-000000000001', 'ffffffff-0000-0000-0000-000000000003',
+             '33333333-3333-3333-3333-333333333333', '55555555-5555-5555-5555-555555555555', 'active')$q$
+);
+
+select testing.expect_denied(
+  'creator_B', 'collab delete: creator cannot delete a collaboration',
+  $q$delete from public.collaborations
        where application_id = '33333333-aaaa-0000-0000-000000000002'$q$
 );
 
@@ -302,6 +353,21 @@ select testing.expect_denied_select(
   $q$select 1 from public.creator_verifications$q$
 );
 
+-- COLLABORATION UPDATE: a Business that does not own the row (migration 010).
+select testing.expect_denied(
+  'business_A', 'collab update: non-owner business cannot complete another business''s collaboration',
+  $q$update public.collaborations
+       set status = 'completed'
+       where application_id = '33333333-aaaa-0000-0000-000000000002'$q$
+);
+
+select testing.expect_denied(
+  'business_A', 'collab update: non-owner business cannot claim a collaboration',
+  $q$update public.collaborations
+       set business_id = '44444444-4444-4444-4444-444444444444'
+       where application_id = '33333333-aaaa-0000-0000-000000000002'$q$
+);
+
 -- =============================================================================
 -- business_B — the Business inside the completed collaboration
 -- =============================================================================
@@ -363,6 +429,53 @@ select testing.expect_denied_select(
   $q$select 1 from public.creator_metric_evidence$q$
 );
 
+-- The owning Business is the one identity that may drive the status. The
+-- fixture collaboration is already 'completed', so exercise the allowed write
+-- on a non-terminal column; expect_allowed_write rolls it back.
+select testing.expect_allowed_write(
+  'business_B', 'collab update: owning business may update its own collaboration',
+  $q$update public.collaborations
+       set notes = 'Nota interna del business'
+       where application_id = '33333333-aaaa-0000-0000-000000000002'$q$
+);
+
+-- ...but not repoint identity columns. The guard applies to the owner too:
+-- this hole was reachable from either side before 010.
+select testing.expect_denied(
+  'business_B', 'collab update: owning business cannot repoint creator_id',
+  $q$update public.collaborations
+       set creator_id = '22222222-2222-2222-2222-222222222222'
+       where application_id = '33333333-aaaa-0000-0000-000000000002'$q$
+);
+
+select testing.expect_denied(
+  'business_B', 'collab update: owning business cannot repoint experience_id',
+  $q$update public.collaborations
+       set experience_id = 'ffffffff-0000-0000-0000-000000000001'
+       where application_id = '33333333-aaaa-0000-0000-000000000002'$q$
+);
+
+-- COUNTER IDEMPOTENCY. fn_on_collaboration_completed increments only on the
+-- transition INTO 'completed'. Without the terminal-state guard the owner
+-- could cycle completed -> active -> completed and inflate the Creator's
+-- counter once per cycle, so reopening a terminal collaboration is refused.
+select testing.expect_denied(
+  'business_B', 'completion: terminal collaboration cannot be reopened (counter idempotency)',
+  $q$update public.collaborations
+       set status = 'active'
+       where application_id = '33333333-aaaa-0000-0000-000000000002'$q$
+);
+
+-- Re-completing an already-completed collaboration must not increment again.
+-- The write itself is permitted (status is unchanged, so the terminal guard
+-- does not fire) and the trigger's old.status check makes it a no-op.
+select testing.expect_allowed_write(
+  'business_B', 'completion: re-writing completed status does not re-increment',
+  $q$update public.collaborations
+       set status = 'completed'
+       where application_id = '33333333-aaaa-0000-0000-000000000002'$q$
+);
+
 -- =============================================================================
 -- admin — completion invariants (admin can read everything by policy)
 -- =============================================================================
@@ -385,6 +498,35 @@ select testing.expect_select_count(
   $q$select 1 from public.creator_profiles
      where id = '33333333-3333-3333-3333-333333333333'
        and completed_collaborations_count >= 1$q$,
+  1
+);
+
+-- Exact value, not just ">= 1". The fixture completes exactly one
+-- collaboration for creator_B, and every attempt above to re-complete or
+-- reopen it was either rejected or a no-op, so the counter must still be
+-- exactly 1. Before migration 010 this read 2 after a creator self-complete.
+select testing.expect_select_count(
+  'admin', 'completion: counter is exactly 1 after all re-completion attempts',
+  $q$select 1 from public.creator_profiles
+     where id = '33333333-3333-3333-3333-333333333333'
+       and completed_collaborations_count = 1$q$,
+  1
+);
+
+-- The hardened policy set: participant UPDATE is gone, owner UPDATE is in.
+select testing.expect_select_count(
+  'admin', 'policy: collaborations_update_participant no longer exists',
+  $q$select 1 from pg_policies
+     where schemaname = 'public' and tablename = 'collaborations'
+       and policyname = 'collaborations_update_participant'$q$,
+  0
+);
+
+select testing.expect_select_count(
+  'admin', 'policy: collaborations_update_business exists',
+  $q$select 1 from pg_policies
+     where schemaname = 'public' and tablename = 'collaborations'
+       and policyname = 'collaborations_update_business'$q$,
   1
 );
 
