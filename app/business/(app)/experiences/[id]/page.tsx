@@ -42,25 +42,31 @@ export default async function ExperienceDetailPage({ params }: ExperienceDetailP
   }
 
   return (
-    <div className="flex flex-1 flex-col bg-zinc-50 px-6 py-8 dark:bg-black">
+    <div className="flex flex-1 flex-col bg-zinc-50 px-4 py-6 md:px-6 md:py-8 dark:bg-black">
       <div className="mx-auto w-full max-w-2xl space-y-6">
         {/* Header with back link */}
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <Link
-              href="/business/experiences"
-              className="text-sm text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300"
-            >
-              ← Indietro
-            </Link>
-            <div>
-              <h1 className="text-3xl font-bold text-zinc-950 dark:text-zinc-50">
+        <div className="space-y-3">
+          <Link
+            href="/business/experiences"
+            className="inline-block text-sm text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300"
+          >
+            ← Indietro
+          </Link>
+          <div className="flex flex-wrap items-start justify-between gap-3">
+            <div className="min-w-0">
+              <h1 className="break-words text-2xl font-bold text-zinc-950 md:text-3xl dark:text-zinc-50">
                 {experience.title}
               </h1>
               <p className="mt-1 text-sm text-zinc-600 dark:text-zinc-400">
                 Stato: <span className="font-medium">{experience.status}</span>
               </p>
             </div>
+            <Link
+              href={`/business/experiences/${experienceId}/report`}
+              className="shrink-0 rounded-md border border-zinc-300 px-3 py-1.5 text-sm font-medium text-zinc-700 hover:bg-zinc-100 dark:border-zinc-700 dark:text-zinc-200 dark:hover:bg-zinc-800"
+            >
+              Vedi report
+            </Link>
           </div>
         </div>
 

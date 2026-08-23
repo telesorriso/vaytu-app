@@ -16,7 +16,7 @@ import { usePathname } from 'next/navigation';
 const NAV_ITEMS = [
   { href: '/creator', label: 'Scopri' },
   { href: '/creator/candidature', label: 'Candidature' },
-  { href: '/creator/messaggi', label: 'Messaggi' },
+  { href: '/creator/collaborazioni', label: 'Collaborazioni' },
   { href: '/creator/profilo', label: 'Profilo' },
 ] as const;
 

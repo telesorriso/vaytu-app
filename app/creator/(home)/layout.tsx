@@ -8,10 +8,10 @@ import { CreatorBottomNav } from '@/components/creator-home/CreatorBottomNav';
 import { CreatorSidebar } from '@/components/creator-home/CreatorSidebar';
 
 // =============================================================================
-// VAYTU — Creator Home chrome (Scopri / Candidature / Messaggi / Profilo)
+// VAYTU — Creator Home chrome (Scopri / Candidature / Collaborazioni / Profilo)
 // =============================================================================
 // A route group ((home)) so this layout applies ONLY to /creator,
-// /creator/candidature, /creator/messaggi and /creator/profilo — NOT to
+// /creator/candidature and /creator/profilo — NOT to
 // /creator/onboarding/**, which is a sibling directory outside this group
 // and keeps its own separate stepper UI untouched.
 //
