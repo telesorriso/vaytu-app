@@ -1,10 +1,12 @@
 'use client';
 
+import Link from 'next/link';
 import { useMemo, useState } from 'react';
 import { OpportunityFilters, type OpportunityFilter } from './OpportunityFilters';
 import { ExperienceCard } from './ExperienceCard';
 import { EmptyOpportunities } from './EmptyOpportunities';
 import type { DemoExperience, DemoExperienceCategory } from '@/lib/demo/experiences';
+import type { ExperienceRow } from '@/lib/db/types';
 
 // =============================================================================
 // VAYTU — OpportunitiesSection
@@ -14,22 +16,42 @@ import type { DemoExperience, DemoExperienceCategory } from '@/lib/demo/experien
 // foundation, not the real matching feature. "Vicino a me" has no
 // distance/geo data source yet, so it honestly falls through to the empty
 // state rather than pretending to filter by location.
+//
+// Accepts both DemoExperience (from demo mode) and ExperienceRow (from DB).
+// For real experiences, businessName is looked up separately and passed through.
 // =============================================================================
 
-const FILTER_TO_CATEGORY: Partial<Record<OpportunityFilter, DemoExperienceCategory>> = {
+const FILTER_TO_CATEGORY: Partial<Record<OpportunityFilter, DemoExperienceCategory | string>> = {
   Food: 'food',
   Wellness: 'wellness',
   Altro: 'lifestyle',
 };
 
-export function OpportunitiesSection({ experiences }: { experiences: DemoExperience[] }) {
+interface ExperienceWithBusinessName extends ExperienceRow {
+  businessName?: string;
+}
+
+export function OpportunitiesSection({
+  experiences,
+}: {
+  experiences: DemoExperience[] | ExperienceWithBusinessName[];
+}) {
   const [active, setActive] = useState<OpportunityFilter>('Tutte');
 
   const filtered = useMemo(() => {
     if (active === 'Tutte') return experiences;
     const category = FILTER_TO_CATEGORY[active];
     if (!category) return []; // "Vicino a me" / "Beauty": no matching data source yet
-    return experiences.filter((exp) => exp.category === category);
+    return experiences.filter((exp) => {
+      // Handle both demo and real experiences
+      if ('category' in exp && (exp as ExperienceRow).category) {
+        return (exp as ExperienceRow).category === category;
+      }
+      if ('category' in exp && (exp as DemoExperience).category) {
+        return (exp as DemoExperience).category === category;
+      }
+      return false;
+    });
   }, [experiences, active]);
 
   return (
@@ -47,19 +69,55 @@ export function OpportunitiesSection({ experiences }: { experiences: DemoExperie
         <EmptyOpportunities />
       ) : (
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {filtered.map((exp) => (
-            <ExperienceCard
-              key={exp.id}
-              title={exp.title}
-              businessName={exp.businessName}
-              city={exp.city}
-              benefit={exp.benefit}
-              tags={[exp.categoryLabel, ...exp.tags.filter((tag) => tag !== exp.categoryLabel)]}
-              compatibilityPct={exp.compatibilityPct}
-              imageGradient={exp.imageGradient}
-              imageUrl={exp.imageUrl}
-            />
-          ))}
+          {filtered.map((exp) => {
+            // Check if this is a demo experience or a real one
+            const isDemoExp = 'benefit' in exp;
+
+            if (isDemoExp) {
+              const demo = exp as DemoExperience;
+              return (
+                <ExperienceCard
+                  key={demo.id}
+                  title={demo.title}
+                  businessName={demo.businessName}
+                  city={demo.city}
+                  benefit={demo.benefit}
+                  tags={[demo.categoryLabel, ...demo.tags.filter((tag) => tag !== demo.categoryLabel)]}
+                  compatibilityPct={demo.compatibilityPct}
+                  imageGradient={demo.imageGradient}
+                  imageUrl={demo.imageUrl}
+                />
+              );
+            } else {
+              // Real experience - wrap in Link for navigation
+              const real = exp as ExperienceWithBusinessName;
+              return (
+                <Link
+                  key={real.id}
+                  href={`/creator/experiences/${real.id}`}
+                  className="hover:shadow-lg transition-shadow"
+                >
+                  <ExperienceCard
+                    title={real.title}
+                    businessName={real.businessName || 'Business'}
+                    city={real.city || 'Luogo sconosciuto'}
+                    benefit={
+                      real.compensation_type === 'paid' && real.compensation_value
+                        ? `€${real.compensation_value}`
+                        : real.compensation_type
+                            .split('_')
+                            .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+                            .join(' ') || 'Esperienza'
+                    }
+                    tags={real.category ? [real.category] : []}
+                    compatibilityPct={75} // TODO: implement matching algorithm
+                    imageGradient="linear-gradient(135deg, #667eea 0%, #764ba2 100%)"
+                    imageUrl={undefined}
+                  />
+                </Link>
+              );
+            }
+          })}
         </div>
       )}
     </section>
