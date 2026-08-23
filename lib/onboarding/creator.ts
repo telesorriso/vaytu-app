@@ -1,4 +1,5 @@
 import 'server-only';
+import { cache } from 'react';
 import { redirect } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
 import { getAuthUser, requireRole } from '@/lib/auth/dal';
@@ -44,7 +45,7 @@ export interface CreatorOnboardingData {
  * the CURRENTLY authenticated user only — every query below is scoped by
  * RLS to the caller's own rows regardless of what we ask for.
  */
-export async function getCreatorOnboardingData(): Promise<CreatorOnboardingData | null> {
+export const getCreatorOnboardingData = cache(async (): Promise<CreatorOnboardingData | null> => {
   const user = await getAuthUser();
   if (!user) return null;
 
@@ -95,7 +96,7 @@ export async function getCreatorOnboardingData(): Promise<CreatorOnboardingData 
     evidenceKinds,
     latestVerification,
   };
-}
+});
 
 /** The first step whose prerequisites are NOT yet satisfied. */
 export function computeCreatorStep(data: CreatorOnboardingData): CreatorStep {
