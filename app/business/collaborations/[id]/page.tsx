@@ -1,6 +1,9 @@
 import Link from 'next/link';
 import { requireRole } from '@/lib/auth/dal';
+import { getAuthUser } from '@/lib/auth/dal';
 import { getCollaborationDetail, getCollaborationDeliverables, getCollaborationSubmissions, canCompleteCollaboration, getCollaborationNextAction } from '@/lib/collaborations/data';
+import { getReceivedReviews, getGivenReviews } from '@/lib/reviews/data';
+import CompletedCollaborationView from './completed';
 
 interface CollaborationPageProps {
   params: { id: string };
@@ -8,8 +11,35 @@ interface CollaborationPageProps {
 
 export default async function BusinessCollaborationPage({ params }: CollaborationPageProps) {
   await requireRole('business');
+  const user = await getAuthUser();
+
   const collaboration = await getCollaborationDetail(params.id);
   if (!collaboration) return <div className="p-8 text-center">Collaborazione non trovata</div>;
+
+  // If collaboration is completed, show completed view
+  if (collaboration.status === 'completed' && user) {
+    const deliverables = await getCollaborationDeliverables(params.id);
+    const submissions = await getCollaborationSubmissions(params.id);
+    const receivedReviews = await getReceivedReviews();
+    const givenReviews = await getGivenReviews();
+
+    const receivedReview = receivedReviews.find(
+      (r) => r.collaboration_id === params.id && r.review_type === 'creator_to_business'
+    ) || null;
+    const givenReview = givenReviews.find(
+      (r) => r.collaboration_id === params.id && r.review_type === 'business_to_creator'
+    ) || null;
+
+    return (
+      <CompletedCollaborationView
+        collaboration={collaboration}
+        deliverables={deliverables}
+        submissions={submissions}
+        givenReview={givenReview}
+        receivedReview={receivedReview}
+      />
+    );
+  }
 
   const deliverables = await getCollaborationDeliverables(params.id);
   const submissions = await getCollaborationSubmissions(params.id);
