@@ -17,7 +17,11 @@
 
 const BASE = process.env.VAYTU_BASE_URL ?? 'http://localhost:3000';
 
-const PUBLIC_ROUTES = ['/', '/login', '/signup'];
+// /forgot-password and /reset-password are public by design: a user who has
+// lost their password cannot authenticate to reach them. /reset-password
+// renders its invalid-link state without a recovery session rather than a
+// usable form — the session gate is in the page and re-checked in the action.
+const PUBLIC_ROUTES = ['/', '/login', '/signup', '/forgot-password', '/reset-password'];
 
 // Anonymous requests to these must redirect. NOTE: this includes paths whose
 // route file does not exist (e.g. /creator/messaggi, removed in FASE 9):

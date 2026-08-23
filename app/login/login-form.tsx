@@ -19,9 +19,8 @@ import { login, type AuthActionState } from '@/app/auth/actions';
 // keyboard hints (inputMode / enterKeyHint). autoComplete is left as
 // email / current-password so password managers keep working.
 //
-// No "Password dimenticata?" link: there is no password-reset route in the
-// app, and a link to nowhere is worse than its absence. See the PR for the
-// follow-up this needs.
+// "Password dimenticata?" sits directly under the password field and points
+// at the real recovery flow (/forgot-password).
 // =============================================================================
 
 const initialState: AuthActionState = {};
@@ -86,6 +85,18 @@ export function LoginForm() {
           aria-describedby={state.error ? errorId : undefined}
           className={FIELD_CLASS}
         />
+
+        {/* Standalone control, not a link inside a sentence, so it needs a
+            real 44px target rather than the WCAG 2.5.8 inline exemption.
+            -mr-1 pulls the added padding back so it stays flush right. */}
+        <div className="flex justify-end">
+          <Link
+            href="/forgot-password"
+            className="vaytu-focus -mr-1 inline-flex min-h-11 items-center rounded px-1 text-sm text-zinc-500 underline underline-offset-4 hover:text-zinc-800 dark:text-zinc-400 dark:hover:text-zinc-200"
+          >
+            Password dimenticata?
+          </Link>
+        </div>
       </div>
 
       {state.error && (
