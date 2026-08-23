@@ -2,6 +2,7 @@ import type { ReactNode } from 'react';
 import { redirect } from 'next/navigation';
 import { requireRole } from '@/lib/auth/dal';
 import { getCreatorOnboardingData, hasSubmittedApplication } from '@/lib/onboarding/creator';
+import { getUnreadNotificationCount } from '@/lib/notifications/data';
 import { CreatorHeader } from '@/components/creator-home/CreatorHeader';
 import { CreatorBottomNav } from '@/components/creator-home/CreatorBottomNav';
 import { CreatorSidebar } from '@/components/creator-home/CreatorSidebar';
@@ -33,6 +34,8 @@ export default async function CreatorHomeLayout({ children }: { children: ReactN
     redirect('/creator/onboarding/status');
   }
 
+  const unreadCount = await getUnreadNotificationCount();
+
   return (
     <div className="flex min-h-screen w-full bg-zinc-50 dark:bg-black">
       <CreatorSidebar />
@@ -42,7 +45,11 @@ export default async function CreatorHomeLayout({ children }: { children: ReactN
           natural, unwrapped width would otherwise blow out this whole column,
           and with it the page, past the viewport on mobile). */}
       <div className="flex min-h-screen min-w-0 flex-1 flex-col">
-        <CreatorHeader avatarUrl={data.profile.avatar_url} fullName={data.profile.full_name} />
+        <CreatorHeader
+          avatarUrl={data.profile.avatar_url}
+          fullName={data.profile.full_name}
+          unreadNotifications={unreadCount}
+        />
         <main className="min-w-0 flex-1 pb-24 md:pb-10">
           <div className="mx-auto w-full max-w-5xl px-4 py-3.5 md:py-6">{children}</div>
         </main>
