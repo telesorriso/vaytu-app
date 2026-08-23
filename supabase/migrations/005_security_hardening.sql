@@ -66,25 +66,12 @@ alter function public.is_trusted_system_context()
 -- working, since RLS evaluates policy expressions with the definer's rights
 -- regardless of the calling role's own EXECUTE grant — but they are excluded
 -- from this migration's scope entirely, per explicit instruction).
---
--- IMPORTANT: Postgres grants EXECUTE on every newly created function to the
--- implicit PUBLIC pseudo-role by default (proacl starts as `{=X/owner,...}`,
--- where the empty role name before `=` denotes PUBLIC). Every real role,
--- including anon and authenticated, inherits privileges from PUBLIC.
--- REVOKE ... FROM anon, authenticated alone does NOT remove that standing
--- PUBLIC grant, so it has no real effect on its own — verified against the
--- hosted database with has_function_privilege() after applying an earlier,
--- incomplete version of this migration (anon/authenticated could still
--- execute all 8 functions). REVOKE ... FROM PUBLIC is what actually closes
--- it; the explicit anon/authenticated revokes are kept alongside it purely
--- for readability/documentation of intent, not because they do anything
--- PUBLIC doesn't already cover.
 
-revoke execute on function public.fn_audit_log() from public, anon, authenticated;
-revoke execute on function public.fn_create_collaboration_on_acceptance() from public, anon, authenticated;
-revoke execute on function public.fn_notify_application_created() from public, anon, authenticated;
-revoke execute on function public.fn_notify_application_decided() from public, anon, authenticated;
-revoke execute on function public.fn_notify_submission_reviewed() from public, anon, authenticated;
-revoke execute on function public.fn_on_collaboration_completed() from public, anon, authenticated;
-revoke execute on function public.fn_sync_business_verification_status() from public, anon, authenticated;
-revoke execute on function public.fn_sync_creator_verification_status() from public, anon, authenticated;
+revoke execute on function public.fn_audit_log() from anon, authenticated;
+revoke execute on function public.fn_create_collaboration_on_acceptance() from anon, authenticated;
+revoke execute on function public.fn_notify_application_created() from anon, authenticated;
+revoke execute on function public.fn_notify_application_decided() from anon, authenticated;
+revoke execute on function public.fn_notify_submission_reviewed() from anon, authenticated;
+revoke execute on function public.fn_on_collaboration_completed() from anon, authenticated;
+revoke execute on function public.fn_sync_business_verification_status() from anon, authenticated;
+revoke execute on function public.fn_sync_creator_verification_status() from anon, authenticated;
