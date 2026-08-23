@@ -46,3 +46,29 @@ body {
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
 }
+
+/* ---------------------------------------------------------------------------
+ * Keyboard focus ring
+ * ---------------------------------------------------------------------------
+ * A single definition for keyboard focus, so controls that need a ring do not
+ * each re-invent one.
+ *
+ * outline-color is deliberately currentColor rather than the gold token.
+ * Measured in Chromium: this resolves to near-black on the light ground and
+ * near-white on the dark ground, so the ring is high-contrast in both themes.
+ * A fixed gold (#a9822f light / #d4b567 dark) cannot make that guarantee
+ * against every surface the ring appears on, and a focus indicator that is
+ * hard to see is an accessibility defect, not a styling preference. Gold stays
+ * reserved for its semantic uses (Vaytu Level, landing headline).
+ *
+ * Do not pair this class with outline-none.
+ * ------------------------------------------------------------------------- */
+.vaytu-focus:focus-visible {
+  /* Longhands rather than the `outline` shorthand: Tailwind v4 registers
+     --tw-outline-style via @property, and keeping the properties separate
+     avoids interacting with it. */
+  outline-width: 2px;
+  outline-style: solid;
+  outline-color: currentColor;
+  outline-offset: 2px;
+}
