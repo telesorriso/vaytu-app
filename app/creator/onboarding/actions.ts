@@ -19,6 +19,7 @@ import {
   evidencePath,
 } from '@/lib/storage/paths';
 import { EVIDENCE_KINDS, type EvidenceKind } from '@/lib/db/types';
+import { ActionTimeoutError, withTimeout } from '@/lib/actions/timeout';
 
 export interface StepActionState {
   error?: string;
@@ -73,9 +74,14 @@ export async function submitIdentita(
   if (avatarFile && avatarFile.size > 0) {
     const supabase = await createClient();
     const path = avatarPath(profile.id, avatarFile);
-    const { error: uploadError } = await supabase.storage
-      .from(PUBLIC_ASSETS_BUCKET)
-      .upload(path, avatarFile, { upsert: true });
+    let uploadError;
+    try {
+      ({ error: uploadError } = await withTimeout(
+        supabase.storage.from(PUBLIC_ASSETS_BUCKET).upload(path, avatarFile, { upsert: true })
+      ));
+    } catch (err) {
+      return { error: err instanceof ActionTimeoutError ? err.message : 'Caricamento della foto non riuscito. Riprova.' };
+    }
     if (uploadError) return { error: uploadError.message };
 
     const { data: publicUrl } = supabase.storage.from(PUBLIC_ASSETS_BUCKET).getPublicUrl(path);
@@ -229,23 +235,42 @@ export async function submitEvidence(
   const profile = await requireRole('creator');
   const supabase = await createClient();
 
-  const { data: metric, error: metricError } = await supabase
-    .from('creator_metrics')
-    .select('id')
-    .eq('creator_id', profile.id)
-    .eq('platform', 'instagram')
-    .order('recorded_at', { ascending: false })
-    .limit(1)
-    .maybeSingle();
+  // Every network call below is wrapped in withTimeout(): neither
+  // @supabase/storage-js nor postgrest-js apply a default request timeout,
+  // so a single stalled call would otherwise leave this Server Action's
+  // promise (and the client's "Carico gli screenshot…" pending state)
+  // hanging forever with no error ever shown. A timeout here always
+  // produces a definite { error } result instead.
+
+  let metricResult;
+  try {
+    metricResult = await withTimeout(
+      supabase
+        .from('creator_metrics')
+        .select('id')
+        .eq('creator_id', profile.id)
+        .eq('platform', 'instagram')
+        .order('recorded_at', { ascending: false })
+        .limit(1)
+        .maybeSingle()
+    );
+  } catch (err) {
+    return { error: err instanceof ActionTimeoutError ? err.message : 'Verifica del passo Social non riuscita. Riprova.' };
+  }
+  const { data: metric, error: metricError } = metricResult;
 
   if (metricError || !metric) {
     return { error: 'Completa prima il passo Social (Instagram e follower dichiarati).' };
   }
 
-  const { data: existingEvidence } = await supabase
-    .from('creator_metric_evidence')
-    .select('storage_path')
-    .eq('metric_id', metric.id);
+  let existingEvidence;
+  try {
+    ({ data: existingEvidence } = await withTimeout(
+      supabase.from('creator_metric_evidence').select('storage_path').eq('metric_id', metric.id)
+    ));
+  } catch (err) {
+    return { error: err instanceof ActionTimeoutError ? err.message : 'Lettura degli screenshot esistenti non riuscita. Riprova.' };
+  }
   const already = new Set(
     (existingEvidence ?? [])
       .map((e) => e.storage_path.match(/\/metrics\/([a-z]+)\./)?.[1])
@@ -262,17 +287,34 @@ export async function submitEvidence(
     }
 
     const path = evidencePath(profile.id, kind, file);
-    const { error: uploadError } = await supabase.storage
-      .from(VERIFICATION_EVIDENCE_BUCKET)
-      .upload(path, file, { upsert: true });
+    let uploadError;
+    try {
+      ({ error: uploadError } = await withTimeout(
+        supabase.storage.from(VERIFICATION_EVIDENCE_BUCKET).upload(path, file, { upsert: true })
+      ));
+    } catch (err) {
+      return {
+        error:
+          err instanceof ActionTimeoutError
+            ? err.message
+            : `Caricamento dello screenshot "${kind}" non riuscito. Riprova.`,
+      };
+    }
     if (uploadError) return { error: uploadError.message };
 
-    const { error: insertError } = await supabase.from('creator_metric_evidence').insert({
-      metric_id: metric.id,
-      creator_id: profile.id,
-      storage_path: path,
-      file_type: file.type,
-    });
+    let insertError;
+    try {
+      ({ error: insertError } = await withTimeout(
+        supabase.from('creator_metric_evidence').insert({
+          metric_id: metric.id,
+          creator_id: profile.id,
+          storage_path: path,
+          file_type: file.type,
+        })
+      ));
+    } catch (err) {
+      return { error: err instanceof ActionTimeoutError ? err.message : 'Salvataggio dello screenshot non riuscito. Riprova.' };
+    }
     if (insertError && insertError.code !== '23505') return { error: insertError.message };
   }
 

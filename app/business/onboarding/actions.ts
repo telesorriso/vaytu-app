@@ -15,6 +15,7 @@ import {
   businessLogoPath,
   businessCoverPath,
 } from '@/lib/storage/paths';
+import { ActionTimeoutError, withTimeout } from '@/lib/actions/timeout';
 
 export interface StepActionState {
   error?: string;
@@ -63,9 +64,14 @@ export async function submitIdentita(
   if (logoFile && logoFile.size > 0) {
     const supabase = await createClient();
     const path = businessLogoPath(profile.id, logoFile);
-    const { error: uploadError } = await supabase.storage
-      .from(PUBLIC_ASSETS_BUCKET)
-      .upload(path, logoFile, { upsert: true });
+    let uploadError;
+    try {
+      ({ error: uploadError } = await withTimeout(
+        supabase.storage.from(PUBLIC_ASSETS_BUCKET).upload(path, logoFile, { upsert: true })
+      ));
+    } catch (err) {
+      return { error: err instanceof ActionTimeoutError ? err.message : 'Caricamento del logo non riuscito. Riprova.' };
+    }
     if (uploadError) return { error: uploadError.message };
 
     const { data: publicUrl } = supabase.storage.from(PUBLIC_ASSETS_BUCKET).getPublicUrl(path);
@@ -218,9 +224,14 @@ export async function submitPresentazione(
   if (coverFile && coverFile.size > 0) {
     const supabase = await createClient();
     const path = businessCoverPath(profile.id, coverFile);
-    const { error: uploadError } = await supabase.storage
-      .from(PUBLIC_ASSETS_BUCKET)
-      .upload(path, coverFile, { upsert: true });
+    let uploadError;
+    try {
+      ({ error: uploadError } = await withTimeout(
+        supabase.storage.from(PUBLIC_ASSETS_BUCKET).upload(path, coverFile, { upsert: true })
+      ));
+    } catch (err) {
+      return { error: err instanceof ActionTimeoutError ? err.message : 'Caricamento della copertina non riuscito. Riprova.' };
+    }
     if (uploadError) return { error: uploadError.message };
 
     const { data: publicUrl } = supabase.storage.from(PUBLIC_ASSETS_BUCKET).getPublicUrl(path);
