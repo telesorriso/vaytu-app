@@ -50,9 +50,12 @@ echo "== [4/4] Running RLS test suite for all 6 roles + post-collaboration tests
 # 50_post_collaboration_tests.sql is not per-role: it covers the reviews /
 # submissions / reporting-isolation / notification-ownership rules the
 # Post-Collaboration milestone depends on, switching role per assertion.
+# 60_application_submit_tests.sql closes the gap the "creator application
+# fails" investigation found: no file ever exercised a legitimate
+# application INSERT actually succeeding, only a single DENY case.
 for f in 10_rls_test_anonymous.sql 20_rls_test_creator_a.sql 21_rls_test_creator_b.sql \
          30_rls_test_business_a.sql 31_rls_test_business_b.sql 40_rls_test_admin.sql \
-         50_post_collaboration_tests.sql; do
+         50_post_collaboration_tests.sql 60_application_submit_tests.sql; do
   echo "   -> $f"
   $PSQL -d "$DB_NAME" -f "$SCRIPT_DIR/$f"
 done
