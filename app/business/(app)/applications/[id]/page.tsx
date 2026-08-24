@@ -132,22 +132,44 @@ export default async function ApplicationDetailPage({ params }: ApplicationDetai
             Profilo Creator
           </h3>
 
-          {application.creatorProfile?.avatar_url && (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img
-              src={application.creatorProfile.avatar_url}
-              alt={application.creatorProfile.display_name}
-              className="mb-4 h-20 w-20 rounded-lg object-cover"
-            />
+          {/* No avatar here: it lives on `profiles`, which a Business has no
+              RLS-granted read access to for another user (only the owner and
+              admin can read a profiles row) — see getApplicationDetail(). */}
+          <div className="flex items-center gap-2">
+            <h4 className="min-w-0 break-words font-semibold text-zinc-950 dark:text-zinc-50">
+              {application.creatorProfile?.display_name || 'Creator'}
+            </h4>
+            {application.creatorProfile?.verification_status === 'verified' && (
+              <span
+                title="Creator verificato"
+                className="shrink-0 rounded-full bg-blue-100 px-2 py-0.5 text-xs font-medium text-blue-700 dark:bg-blue-900 dark:text-blue-300"
+              >
+                ✓ Verificato
+              </span>
+            )}
+          </div>
+
+          {application.creatorProfile?.username && (
+            <p className="mt-0.5 break-words text-sm text-zinc-500 dark:text-zinc-500">
+              @{application.creatorProfile.username}
+            </p>
           )}
 
-          <h4 className="font-semibold text-zinc-950 dark:text-zinc-50">
-            {application.creatorProfile?.display_name || 'Creator'}
-          </h4>
+          {application.creatorProfile?.levelName && (
+            <p className="mt-1 text-sm text-zinc-600 dark:text-zinc-400">
+              🏅 {application.creatorProfile.levelName}
+            </p>
+          )}
 
           {application.creatorProfile?.city && (
             <p className="mt-1 text-sm text-zinc-600 dark:text-zinc-400">
               📍 {application.creatorProfile.city}
+            </p>
+          )}
+
+          {application.creatorProfile?.bio && (
+            <p className="mt-3 whitespace-pre-wrap break-words text-sm text-zinc-700 dark:text-zinc-300">
+              {application.creatorProfile.bio}
             </p>
           )}
 
@@ -166,6 +188,22 @@ export default async function ApplicationDetailPage({ params }: ApplicationDetai
                   </span>
                 ))}
               </div>
+            </div>
+          )}
+
+          {(application.creatorProfile?.instagram_handle ||
+            application.creatorProfile?.tiktok_handle) && (
+            <div className="mt-3 space-y-1 border-t border-zinc-200 pt-3 text-sm dark:border-zinc-700">
+              {application.creatorProfile?.instagram_handle && (
+                <p className="break-words text-zinc-600 dark:text-zinc-400">
+                  Instagram: @{application.creatorProfile.instagram_handle}
+                </p>
+              )}
+              {application.creatorProfile?.tiktok_handle && (
+                <p className="break-words text-zinc-600 dark:text-zinc-400">
+                  TikTok: @{application.creatorProfile.tiktok_handle}
+                </p>
+              )}
             </div>
           )}
         </div>

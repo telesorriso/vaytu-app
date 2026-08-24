@@ -93,5 +93,34 @@ console.log('--- createApplication resolves a PUBLISHED experience ---');
   check('calls getPublishedExperience', body.includes('getPublishedExperience('));
 }
 
+// 5. getApplicationDetail's creator_profiles select() must (a) never
+//    reference a column that doesn't exist on creator_profiles — avatar_url
+//    lives on `profiles`, which a Business has no RLS-granted read access
+//    to for another user, and selecting it there previously made the whole
+//    query fail silently, always producing the bare "Creator" placeholder —
+//    and (b) never select a private/sensitive column even if one existed
+//    there, and (c) actually check the query's `error` instead of
+//    discarding it (the same silent-failure shape as (a), generalized).
+console.log('--- getApplicationDetail creator_profiles select is column-safe and error-checked ---');
+{
+  const src = readFileSync(join(root, 'lib/experiences/data.ts'), 'utf8');
+  const fn = src.slice(src.indexOf('export async function getApplicationDetail'));
+  const body = fn.slice(0, fn.indexOf('\nexport async function', 1));
+  const selectMatch = body.match(/\.from\('creator_profiles'\)\s*\.select\(\s*['"]([^'"]*)['"]/s);
+  check('finds the creator_profiles .select() call', Boolean(selectMatch));
+  if (selectMatch) {
+    const columns = selectMatch[1].split(',').map((c) => c.trim());
+    const FORBIDDEN = ['avatar_url', 'email', 'phone', 'reliability_score'];
+    const present = FORBIDDEN.filter((c) => columns.includes(c));
+    check('does not select avatar_url (belongs to profiles, not creator_profiles)',
+      !columns.includes('avatar_url'));
+    check('does not select any other private/sensitive column',
+      present.filter((c) => c !== 'avatar_url').length === 0,
+      present.join(', '));
+  }
+  check('checks the creator_profiles query error instead of discarding it',
+    /error:\s*creatorError/.test(body) && /if\s*\(\s*creatorError\s*\)/.test(body));
+}
+
 console.log(`\nRESULT: ${failures === 0 ? 'PASS' : 'FAIL'} (${failures} problem(s))`);
 process.exit(failures === 0 ? 0 : 1);

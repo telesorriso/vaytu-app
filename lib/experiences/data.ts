@@ -3,6 +3,7 @@ import { createClient } from '@/lib/supabase/server';
 import { getAuthUser } from '@/lib/auth/dal';
 import { withTimeout } from '@/lib/actions/timeout';
 import { toUserMessage } from '@/lib/actions/errors';
+import { getCreatorLevel } from '@/lib/creator-home/level';
 import type {
   ExperienceRow,
   ExperienceImageRow,
@@ -11,6 +12,7 @@ import type {
   CompensationType,
   ApplicationRow,
   ApplicationStatus,
+  VerificationStatus,
 } from '@/lib/db/types';
 
 /**
@@ -490,14 +492,33 @@ export async function getCreatorApplications(): Promise<
 
 /**
  * Gets a single application with creator profile info.
+ *
+ * The creator profile fields selected here are exactly the marketplace-
+ * appropriate surface a Business is meant to vet a candidate on (per
+ * creator_profiles_select_business RLS: any business may read any
+ * creator_profiles row). `avatar_url` is deliberately NOT selected here —
+ * it lives on `profiles`, not `creator_profiles` (see /supabase/migrations/
+ * 002_create_tables.sql), and `profiles` has no business-facing SELECT
+ * policy at all (only the owner and admin can read a profiles row) — email,
+ * phone and other private identity fields live there. Selecting a column
+ * that doesn't exist on creator_profiles previously made this ENTIRE query
+ * fail (PostgREST/Postgres: `column "avatar_url" does not exist`), and the
+ * failure was silently discarded (only `data` was destructured, `error`
+ * was never checked), so creatorProfile was always undefined and the UI
+ * fell back to the bare "Creator" placeholder for every application.
  */
 export async function getApplicationDetail(applicationId: string): Promise<
   (ApplicationRow & {
     creatorProfile?: {
       display_name: string;
-      avatar_url: string | null;
+      username: string | null;
       city: string | null;
+      bio: string | null;
       niches: string[];
+      verification_status: VerificationStatus;
+      instagram_handle: string | null;
+      tiktok_handle: string | null;
+      levelName: string | null;
     };
   }) | null
 > {
@@ -520,19 +541,50 @@ export async function getApplicationDetail(applicationId: string): Promise<
 
     if (!app) return null;
 
-    // Get creator profile
-    const { data: creator } = await withTimeout(
+    // Get creator profile — only columns that actually exist on
+    // creator_profiles (see the function comment above).
+    const { data: creator, error: creatorError } = await withTimeout(
       supabase
         .from('creator_profiles')
-        .select('display_name, avatar_url, city, niches')
+        .select(
+          'display_name, username, city, bio, niches, verification_status, instagram_handle, tiktok_handle, current_level_id'
+        )
         .eq('id', (app as ApplicationRow).creator_id)
         .maybeSingle(),
       10_000
     );
 
+    if (creatorError) {
+      // A real query failure (bad column, RLS denial, timeout, ...) is
+      // structurally different from "this creator has no profile row yet"
+      // (creator === null with no error) — log it so it's diagnosable
+      // server-side instead of silently degrading to the placeholder.
+      toUserMessage(creatorError, 'getApplicationDetail:creator_profiles');
+    } else if (!creator) {
+      console.error('[getApplicationDetail] creator_profiles row missing', {
+        creatorId: (app as ApplicationRow).creator_id,
+      });
+    }
+
+    const level = creator?.current_level_id
+      ? await getCreatorLevel(creator.current_level_id)
+      : null;
+
     return {
       ...(app as ApplicationRow),
-      creatorProfile: creator || undefined,
+      creatorProfile: creator
+        ? {
+            display_name: creator.display_name,
+            username: creator.username,
+            city: creator.city,
+            bio: creator.bio,
+            niches: creator.niches,
+            verification_status: creator.verification_status,
+            instagram_handle: creator.instagram_handle,
+            tiktok_handle: creator.tiktok_handle,
+            levelName: level?.name ?? null,
+          }
+        : undefined,
     };
   } catch {
     return null;
