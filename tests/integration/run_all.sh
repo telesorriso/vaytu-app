@@ -53,9 +53,14 @@ echo "== [4/4] Running RLS test suite for all 6 roles + post-collaboration tests
 # 60_application_submit_tests.sql closes the gap the "creator application
 # fails" investigation found: no file ever exercised a legitimate
 # application INSERT actually succeeding, only a single DENY case.
+# 61_application_creator_profile_tests.sql covers the "Business doesn't see
+# the Creator profile in application detail" investigation: the corrected
+# creator_profiles column list, real content ownership, and that a
+# competing business cannot read another business's application at all.
 for f in 10_rls_test_anonymous.sql 20_rls_test_creator_a.sql 21_rls_test_creator_b.sql \
          30_rls_test_business_a.sql 31_rls_test_business_b.sql 40_rls_test_admin.sql \
-         50_post_collaboration_tests.sql 60_application_submit_tests.sql; do
+         50_post_collaboration_tests.sql 60_application_submit_tests.sql \
+         61_application_creator_profile_tests.sql; do
   echo "   -> $f"
   $PSQL -d "$DB_NAME" -f "$SCRIPT_DIR/$f"
 done
