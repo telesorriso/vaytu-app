@@ -561,7 +561,12 @@ export async function createApplication(
     // it confirms the experience is published and not soft-deleted before a
     // Creator may apply to it.
     const experience = await getPublishedExperience(experienceId);
-    if (!experience) return null;
+    if (!experience) {
+      console.error('[createApplication] experience not found or not published', {
+        experienceId,
+      });
+      return null;
+    }
 
     // Check for existing application from this creator to this experience
     const { data: existingApps } = await withTimeout(
@@ -576,6 +581,10 @@ export async function createApplication(
 
     if (existingApps && existingApps.length > 0) {
       // Creator has already applied to this experience
+      console.error('[createApplication] duplicate application', {
+        experienceId,
+        applicationId: existingApps[0].id,
+      });
       return null;
     }
 
@@ -596,9 +605,21 @@ export async function createApplication(
       10_000
     );
 
-    if (error || !data) return null;
+    if (error || !data) {
+      // Distinguish the real DB rejection (RLS denial, a duplicate that
+      // slipped past the pre-check above via a race, a constraint, a
+      // trigger error, ...) instead of collapsing every INSERT failure
+      // into an indistinguishable null, same as toUserMessage() already
+      // does for every other write in this codebase. The mapped message
+      // is discarded here on purpose — the caller keeps its own
+      // user-friendly generic copy — this call is for the safe
+      // server-side log line only.
+      toUserMessage(error ?? new Error('insert returned no row'), 'createApplication');
+      return null;
+    }
     return data as ApplicationRow;
-  } catch {
+  } catch (err) {
+    toUserMessage(err, 'createApplication');
     return null;
   }
 }
