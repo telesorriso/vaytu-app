@@ -11,7 +11,8 @@
     "test:rls": "bash tests/integration/run_all.sh",
     "test:e2e": "node tests/e2e/anonymous-access.mjs",
     "test:recovery": "node tests/e2e/password-recovery.mjs",
-    "test:redirect": "node tests/unit/redirect-safety.mjs"
+    "test:redirect": "node tests/unit/redirect-safety.mjs",
+    "test:contracts": "node tests/unit/data-layer-contracts.mjs"
   },
   "dependencies": {
     "@supabase/ssr": "^0.12.4",

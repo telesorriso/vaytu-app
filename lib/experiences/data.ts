@@ -2,6 +2,7 @@ import 'server-only';
 import { createClient } from '@/lib/supabase/server';
 import { getAuthUser } from '@/lib/auth/dal';
 import { withTimeout } from '@/lib/actions/timeout';
+import { toUserMessage } from '@/lib/actions/errors';
 import type {
   ExperienceRow,
   ExperienceImageRow,
@@ -554,8 +555,12 @@ export async function createApplication(
   const supabase = await createClient();
 
   try {
-    // First, get the experience to know the business_id
-    const experience = await getExperienceDetail(experienceId);
+    // getPublishedExperience, NOT getExperienceDetail: the latter filters
+    // .eq('business_id', user.id), so for a Creator it always returned null
+    // and no application was ever created. This is also the stricter check —
+    // it confirms the experience is published and not soft-deleted before a
+    // Creator may apply to it.
+    const experience = await getPublishedExperience(experienceId);
     if (!experience) return null;
 
     // Check for existing application from this creator to this experience
@@ -627,10 +632,9 @@ export async function updateApplicationStatus(
       10_000
     );
 
-    if (error) return { error: error.message };
+    if (error) return { error: toUserMessage(error) };
     return { success: true };
   } catch (err) {
-    const message = err instanceof Error ? err.message : 'Errore sconosciuto';
-    return { error: message };
+    return { error: toUserMessage(err) };
   }
 }

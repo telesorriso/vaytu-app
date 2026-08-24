@@ -433,11 +433,10 @@ export async function updateSubmissionStatus(
       10_000
     );
 
-    if (error) return { error: error.message };
+    if (error) return { error: toUserMessage(error) };
     return { success: true };
   } catch (err) {
-    const message = err instanceof Error ? err.message : 'Errore sconosciuto';
-    return { error: message };
+    return { error: toUserMessage(err) };
   }
 }
 

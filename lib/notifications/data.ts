@@ -3,6 +3,7 @@ import { createClient } from '@/lib/supabase/server';
 import { getAuthUser } from '@/lib/auth/dal';
 import { withTimeout } from '@/lib/actions/timeout';
 import type { NotificationRow } from '@/lib/db/types';
+import { toUserMessage } from '@/lib/actions/errors';
 
 /**
  * Gets all notifications for the authenticated user.
@@ -87,11 +88,10 @@ export async function markNotificationAsRead(
       10_000
     );
 
-    if (error) return { error: error.message };
+    if (error) return { error: toUserMessage(error) };
     return { success: true };
   } catch (err) {
-    const message = err instanceof Error ? err.message : 'Errore sconosciuto';
-    return { error: message };
+    return { error: toUserMessage(err) };
   }
 }
 
@@ -120,11 +120,10 @@ export async function markAllNotificationsAsRead(): Promise<{
       10_000
     );
 
-    if (error) return { error: error.message };
+    if (error) return { error: toUserMessage(error) };
     return { success: true };
   } catch (err) {
-    const message = err instanceof Error ? err.message : 'Errore sconosciuto';
-    return { error: message };
+    return { error: toUserMessage(err) };
   }
 }
 
@@ -150,10 +149,9 @@ export async function deleteNotification(notificationId: string): Promise<{
       10_000
     );
 
-    if (error) return { error: error.message };
+    if (error) return { error: toUserMessage(error) };
     return { success: true };
   } catch (err) {
-    const message = err instanceof Error ? err.message : 'Errore sconosciuto';
-    return { error: message };
+    return { error: toUserMessage(err) };
   }
 }

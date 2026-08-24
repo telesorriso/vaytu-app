@@ -3,6 +3,7 @@ import { createClient } from '@/lib/supabase/server';
 import { getAuthUser } from '@/lib/auth/dal';
 import { withTimeout } from '@/lib/actions/timeout';
 import type { ReviewRow, ReviewType } from '@/lib/db/types';
+import { toUserMessage } from '@/lib/actions/errors';
 
 /**
  * Gets all reviews received by the authenticated user (as reviewee).
@@ -201,11 +202,10 @@ export async function updateReview(
       10_000
     );
 
-    if (error) return { error: error.message };
+    if (error) return { error: toUserMessage(error) };
     return { success: true };
   } catch (err) {
-    const message = err instanceof Error ? err.message : 'Errore sconosciuto';
-    return { error: message };
+    return { error: toUserMessage(err) };
   }
 }
 
@@ -228,10 +228,9 @@ export async function deleteReview(reviewId: string): Promise<{ success?: boolea
       10_000
     );
 
-    if (error) return { error: error.message };
+    if (error) return { error: toUserMessage(error) };
     return { success: true };
   } catch (err) {
-    const message = err instanceof Error ? err.message : 'Errore sconosciuto';
-    return { error: message };
+    return { error: toUserMessage(err) };
   }
 }
