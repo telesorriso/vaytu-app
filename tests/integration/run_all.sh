@@ -52,7 +52,7 @@ echo "== [4/4] Running RLS test suite for all 6 roles + post-collaboration tests
 # Post-Collaboration milestone depends on, switching role per assertion.
 for f in 10_rls_test_anonymous.sql 20_rls_test_creator_a.sql 21_rls_test_creator_b.sql \
          30_rls_test_business_a.sql 31_rls_test_business_b.sql 40_rls_test_admin.sql \
-         50_post_collaboration_tests.sql; do
+         50_post_collaboration_tests.sql 60_experience_status_tests.sql; do
   echo "   -> $f"
   $PSQL -d "$DB_NAME" -f "$SCRIPT_DIR/$f"
 done
