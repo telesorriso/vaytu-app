@@ -5,14 +5,16 @@ import { getPublishedExperience } from '@/lib/experiences/data';
 import { ApplicationForm } from '../application-form';
 
 interface ApplyPageProps {
-  params: { id: string };
+  // Next.js 16 passes `params` as a Promise at runtime (see AGENTS.md).
+  params: Promise<{ id: string }>;
 }
 
 export default async function ApplyPage({ params }: ApplyPageProps) {
   await requireRole('creator');
 
   // Load the experience to show context
-  const experience = await getPublishedExperience(params.id);
+  const { id } = await params;
+  const experience = await getPublishedExperience(id);
   if (!experience) {
     redirect('/creator');
   }
@@ -22,7 +24,7 @@ export default async function ApplyPage({ params }: ApplyPageProps) {
       {/* Back link */}
       <div>
         <Link
-          href={`/creator/experiences/${params.id}`}
+          href={`/creator/experiences/${id}`}
           className="text-sm text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300"
         >
           ← Torna ai dettagli

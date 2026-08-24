@@ -7,28 +7,30 @@ import CompletedCollaborationView from './completed';
 import { CompleteButton } from './complete-button';
 
 interface CollaborationPageProps {
-  params: { id: string };
+  // Next.js 16 passes `params` as a Promise at runtime (see AGENTS.md).
+  params: Promise<{ id: string }>;
 }
 
 export default async function BusinessCollaborationPage({ params }: CollaborationPageProps) {
   await requireRole('business');
   const user = await getAuthUser();
+  const { id } = await params;
 
-  const collaboration = await getCollaborationDetail(params.id);
+  const collaboration = await getCollaborationDetail(id);
   if (!collaboration) return <div className="p-8 text-center">Collaborazione non trovata</div>;
 
   // If collaboration is completed, show completed view
   if (collaboration.status === 'completed' && user) {
-    const deliverables = await getCollaborationDeliverables(params.id);
-    const submissions = await getCollaborationSubmissions(params.id);
+    const deliverables = await getCollaborationDeliverables(id);
+    const submissions = await getCollaborationSubmissions(id);
     const receivedReviews = await getReceivedReviews();
     const givenReviews = await getGivenReviews();
 
     const receivedReview = receivedReviews.find(
-      (r) => r.collaboration_id === params.id && r.review_type === 'creator_to_business'
+      (r) => r.collaboration_id === id && r.review_type === 'creator_to_business'
     ) || null;
     const givenReview = givenReviews.find(
-      (r) => r.collaboration_id === params.id && r.review_type === 'business_to_creator'
+      (r) => r.collaboration_id === id && r.review_type === 'business_to_creator'
     ) || null;
 
     return (
@@ -42,10 +44,10 @@ export default async function BusinessCollaborationPage({ params }: Collaboratio
     );
   }
 
-  const deliverables = await getCollaborationDeliverables(params.id);
-  const submissions = await getCollaborationSubmissions(params.id);
-  const completion = await canCompleteCollaboration(params.id);
-  const nextAction = await getCollaborationNextAction(params.id, 'business');
+  const deliverables = await getCollaborationDeliverables(id);
+  const submissions = await getCollaborationSubmissions(id);
+  const completion = await canCompleteCollaboration(id);
+  const nextAction = await getCollaborationNextAction(id, 'business');
 
   return (
     <div className="flex flex-1 flex-col bg-zinc-50 px-6 py-8 dark:bg-black">
@@ -73,7 +75,7 @@ export default async function BusinessCollaborationPage({ params }: Collaboratio
 
         {collaboration.status === 'active' && (
           <CompleteButton
-            collaborationId={params.id}
+            collaborationId={id}
             canComplete={completion.canComplete}
             reason={completion.reason}
           />
