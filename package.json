@@ -13,7 +13,8 @@
     "test:recovery": "node tests/e2e/password-recovery.mjs",
     "test:redirect": "node tests/unit/redirect-safety.mjs",
     "test:contracts": "node tests/unit/data-layer-contracts.mjs",
-    "test:params": "node tests/unit/dynamic-params-contract.mjs"
+    "test:params": "node tests/unit/dynamic-params-contract.mjs",
+    "test:control-flow": "node tests/unit/control-flow-contract.mjs"
   },
   "dependencies": {
     "@supabase/ssr": "^0.12.4",

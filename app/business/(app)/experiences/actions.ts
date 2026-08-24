@@ -23,6 +23,8 @@ export async function submitCreateExperience(
   _prevState: ExperienceFormState,
   formData: FormData
 ): Promise<ExperienceFormState> {
+  let createdId: string | null = null;
+
   try {
     await requireRole('business');
 
@@ -61,12 +63,19 @@ export async function submitCreateExperience(
       return { error: 'Errore nel creare l\'experience. Riprova.' };
     }
 
-    // Redirect to edit page
-    redirect(`/business/experiences/${experience.id}`);
+    createdId = experience.id;
   } catch (err) {
     const message = toUserMessage(err);
     return { error: message };
   }
+
+  // redirect() throws internally and must be called outside try/catch (see
+  // app/creator/experiences/[id]/actions.ts for the full explanation and the
+  // Next.js docs citation). Calling it inside the block above meant the
+  // catch there swallowed every successful creation's redirect and reported
+  // it as a generic error — the experience was created, but the business
+  // only ever saw a failure message and never reached the edit page.
+  redirect(`/business/experiences/${createdId}`);
 }
 
 /**
