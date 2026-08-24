@@ -46,10 +46,9 @@ export async function ensureProfileRow(): Promise<void> {
 
   const { data: existing } = await supabase
     .from('profiles')
-    .select('id')
+    .select('id, role')
     .eq('id', user.id)
     .maybeSingle();
-  if (existing) return;
 
   const metadata = user.user_metadata as {
     role?: string;
@@ -61,15 +60,43 @@ export async function ensureProfileRow(): Promise<void> {
   const fullName = metadata.full_name?.trim() || user.email || 'Utente';
   const displayName = metadata.display_name?.trim() || fullName;
 
-  const { error: profileError } = await supabase.from('profiles').insert({
-    id: user.id,
-    role,
-    email: user.email ?? '',
-    full_name: fullName,
-  });
-  if (profileError) return; // RLS or a race with another request — nothing more we can safely do here.
+  // Trust the stored role over signup metadata for an account that already
+  // exists — metadata is only authoritative the first time.
+  const effectiveRole = (existing?.role as 'creator' | 'business' | 'admin' | undefined) ?? role;
 
-  if (role === 'creator') {
+  if (!existing) {
+    const { error: profileError } = await supabase.from('profiles').insert({
+      id: user.id,
+      role,
+      email: user.email ?? '',
+      full_name: fullName,
+    });
+    if (profileError) return; // RLS or a race with another request — nothing more we can safely do here.
+  }
+
+  // Admins have no extension table.
+  if (effectiveRole === 'admin') return;
+
+  // Deliberately re-checked on EVERY call, not just when the profiles row was
+  // just created. This function used to return early whenever the profiles row
+  // existed, so if the extension insert had failed once (RLS hiccup, race,
+  // dropped connection) it was never retried — and the account was wedged for
+  // good: getCreator/BusinessOnboardingData() returns null without it, and
+  // /creator <-> /creator/onboarding (likewise /business) then redirect into
+  // each other forever. One such business account exists in production today.
+  // Re-running the check here lets the next sign-in repair it.
+  const extensionTable =
+    effectiveRole === 'creator' ? 'creator_profiles' : 'business_profiles';
+
+  const { data: extension } = await supabase
+    .from(extensionTable)
+    .select('id')
+    .eq('id', user.id)
+    .maybeSingle();
+
+  if (extension) return;
+
+  if (effectiveRole === 'creator') {
     await supabase
       .from('creator_profiles')
       .insert({ id: user.id, display_name: displayName });
