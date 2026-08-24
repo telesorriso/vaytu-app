@@ -8,7 +8,14 @@ import { StatusButton } from './status-button';
 import { submitUpdateExperience } from '../actions';
 
 interface ExperienceDetailPageProps {
-  params: { id: string };
+  // Next.js 16 (this repo's version, per AGENTS.md) passes `params` as a
+  // Promise at runtime regardless of what an older synchronous type claims.
+  // With the previous `{ id: string }` type, `params.id` silently evaluated
+  // to undefined (a Promise has no `.id`), getExperienceDetail(undefined)
+  // never matched a row, and every card click redirected straight back to
+  // the list — the exact "click just re-renders" bug this fixes. Matches
+  // the pattern already used correctly in ./report/page.tsx.
+  params: Promise<{ id: string }>;
 }
 
 export default async function ExperienceDetailPage({ params }: ExperienceDetailPageProps) {
@@ -24,7 +31,8 @@ export default async function ExperienceDetailPage({ params }: ExperienceDetailP
   }
 
   // Load experience
-  const experience = await getExperienceDetail(params.id);
+  const { id } = await params;
+  const experience = await getExperienceDetail(id);
   if (!experience) {
     redirect('/business/experiences');
   }
