@@ -6,14 +6,16 @@ import { createClient } from '@/lib/supabase/server';
 import { ApplyButton } from './apply-button';
 
 interface ExperienceDetailPageProps {
-  params: { id: string };
+  // Next.js 16 passes `params` as a Promise at runtime (see AGENTS.md).
+  params: Promise<{ id: string }>;
 }
 
 export default async function ExperienceDetailPage({ params }: ExperienceDetailPageProps) {
   await requireRole('creator');
 
   // Load the published experience
-  const experience = await getPublishedExperience(params.id);
+  const { id } = await params;
+  const experience = await getPublishedExperience(id);
   if (!experience) {
     redirect('/creator');
   }

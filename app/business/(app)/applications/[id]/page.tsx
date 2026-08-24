@@ -6,7 +6,8 @@ import { getApplicationDetail, getExperienceDetail } from '@/lib/experiences/dat
 import { ActionButtons } from './action-buttons';
 
 interface ApplicationDetailPageProps {
-  params: { id: string };
+  // Next.js 16 passes `params` as a Promise at runtime (see AGENTS.md).
+  params: Promise<{ id: string }>;
 }
 
 export default async function ApplicationDetailPage({ params }: ApplicationDetailPageProps) {
@@ -22,7 +23,8 @@ export default async function ApplicationDetailPage({ params }: ApplicationDetai
   }
 
   // Load application
-  const application = await getApplicationDetail(params.id);
+  const { id } = await params;
+  const application = await getApplicationDetail(id);
   if (!application) {
     redirect('/business/applications');
   }

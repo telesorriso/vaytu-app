@@ -12,7 +12,8 @@ import CompletedCollaborationView from './completed';
 import SubmissionForm from './submission-form';
 
 interface CollaborationDetailPageProps {
-  params: { id: string };
+  // Next.js 16 passes `params` as a Promise at runtime (see AGENTS.md).
+  params: Promise<{ id: string }>;
 }
 
 export default async function CollaborationDetailPage({
@@ -20,8 +21,9 @@ export default async function CollaborationDetailPage({
 }: CollaborationDetailPageProps) {
   await requireRole('creator');
   const user = await getAuthUser();
+  const { id } = await params;
 
-  const collaboration = await getCollaborationDetail(params.id);
+  const collaboration = await getCollaborationDetail(id);
   if (!collaboration) {
     return (
       <div className="flex flex-1 flex-col items-center justify-center bg-zinc-50 px-6 dark:bg-black">
@@ -45,16 +47,16 @@ export default async function CollaborationDetailPage({
 
   // If collaboration is completed, show completed view
   if (collaboration.status === 'completed' && user) {
-    const deliverables = await getCollaborationDeliverables(params.id);
-    const submissions = await getCollaborationSubmissions(params.id);
+    const deliverables = await getCollaborationDeliverables(id);
+    const submissions = await getCollaborationSubmissions(id);
     const receivedReviews = await getReceivedReviews();
     const givenReviews = await getGivenReviews();
 
     const receivedReview = receivedReviews.find(
-      (r) => r.collaboration_id === params.id && r.review_type === 'business_to_creator'
+      (r) => r.collaboration_id === id && r.review_type === 'business_to_creator'
     ) || null;
     const givenReview = givenReviews.find(
-      (r) => r.collaboration_id === params.id && r.review_type === 'creator_to_business'
+      (r) => r.collaboration_id === id && r.review_type === 'creator_to_business'
     ) || null;
 
     return (
@@ -68,9 +70,9 @@ export default async function CollaborationDetailPage({
     );
   }
 
-  const deliverables = await getCollaborationDeliverables(params.id);
-  const submissions = await getCollaborationSubmissions(params.id);
-  const nextAction = await getCollaborationNextAction(params.id, 'creator');
+  const deliverables = await getCollaborationDeliverables(id);
+  const submissions = await getCollaborationSubmissions(id);
+  const nextAction = await getCollaborationNextAction(id, 'creator');
 
   const hasDeliverables = deliverables.length > 0;
   const allApproved = hasDeliverables &&
@@ -241,7 +243,7 @@ export default async function CollaborationDetailPage({
                         </div>
                       </div>
                       {d.status !== 'approved' && (
-                        <SubmissionForm collaborationId={params.id} deliverable={d} />
+                        <SubmissionForm collaborationId={id} deliverable={d} />
                       )}
                     </div>
                   ))}
