@@ -1,0 +1,36 @@
+# =============================================================================
+# TELESORRISO — configurazione Netlify
+# =============================================================================
+# Nel pannello Netlify impostare "Base directory" = telesorriso
+# (questa cartella). Variabili d'ambiente: vedi README.md.
+# =============================================================================
+
+[build]
+  command = "npm run build"
+  publish = "dist"
+  functions = "netlify/functions"
+
+[build.environment]
+  NODE_VERSION = "22"
+
+[functions]
+  node_bundler = "esbuild"
+
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Content-Type-Options = "nosniff"
+    X-Frame-Options = "DENY"
+    Referrer-Policy = "strict-origin-when-cross-origin"
+    Permissions-Policy = "camera=(), microphone=(), geolocation=(), payment=()"
+
+[[headers]]
+  for = "/img/*"
+  [headers.values]
+    Cache-Control = "public, max-age=604800"
+
+# Il questionario è raggiungibile anche senza la barra finale.
+[[redirects]]
+  from = "/valutazione"
+  to = "/valutazione/"
+  status = 301
