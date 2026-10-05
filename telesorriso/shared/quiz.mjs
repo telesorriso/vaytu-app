@@ -62,3 +62,33 @@ export const ATTRIBUTION_KEYS = [
   'gclid',
   'fbclid',
 ];
+
+/**
+ * Modalità "drag and drop" (Netlify Forms): nomi dei campi inviati a Netlify.
+ * Sono anche le etichette che la segreteria legge nell'email di notifica,
+ * nell'ordine qui indicato. Il campo `subject` imposta l'oggetto dell'email.
+ */
+export const NETLIFY_FORM_NAME = 'lead';
+export const NETLIFY_FORM_FIELDS = [
+  'subject',
+  'nome',
+  'telefono',
+  'email',
+  'cosa-vorrebbe-migliorare',
+  'quando-vorrebbe-iniziare',
+  'interesse-pagamento-150-al-mese',
+  'sorgente',
+  'mezzo',
+  'campagna',
+  'contenuto',
+  'termine',
+  'gclid',
+  'fbclid',
+  'landing-page',
+  'referrer',
+  'data-e-ora',
+  'presa-visione-privacy',
+  'consenso-marketing',
+  'id-richiesta',
+  'azione',
+];

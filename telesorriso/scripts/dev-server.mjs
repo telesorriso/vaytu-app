@@ -8,6 +8,9 @@
 //   npm run dev                  -> http://localhost:8888
 //   PORT=3000 npm run dev
 //   LEAD_FORCE_ERROR=1 npm run dev  -> /api/lead risponde sempre 502 (test errori)
+//   npm run build:dragdrop && node scripts/dev-server.mjs
+//                                -> versione drag and drop: i POST a Netlify
+//                                   Forms vengono simulati e stampati qui
 // =============================================================================
 import { createServer } from 'node:http';
 import { readFile, stat } from 'node:fs/promises';
@@ -57,6 +60,17 @@ createServer(async (req, res) => {
     }
     res.writeHead(response.status, Object.fromEntries(response.headers));
     res.end(Buffer.from(await response.arrayBuffer()));
+    return;
+  }
+
+  // Simulazione di Netlify Forms (build --netlify-forms): stampa i campi.
+  if (req.method === 'POST' && url.pathname === '/') {
+    let body = '';
+    for await (const c of req) body += c;
+    const fields = new URLSearchParams(body);
+    console.log(`[Netlify Forms simulato] modulo "${fields.get('form-name')}"`);
+    for (const [k, v] of fields) if (k !== 'form-name') console.log(`  ${k}: ${v}`);
+    res.writeHead(process.env.LEAD_FORCE_ERROR ? 500 : 200, { 'content-type': 'text/html' }).end('ok');
     return;
   }
 

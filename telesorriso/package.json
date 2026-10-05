@@ -9,6 +9,7 @@
   },
   "scripts": {
     "build": "node build.mjs",
+    "build:dragdrop": "node build.mjs --netlify-forms",
     "dev": "node build.mjs && node scripts/dev-server.mjs",
     "test": "node --test tests/*.test.mjs"
   }

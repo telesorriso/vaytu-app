@@ -7,11 +7,14 @@
 // Le risposte restano in sessionStorage: un ricaricamento non le perde.
 // Domande e opzioni sono in /shared/quiz.mjs.
 // =============================================================================
-import { QUESTIONS } from './quiz-config.mjs';
+import { QUESTIONS, NETLIFY_FORM_NAME } from './quiz-config.mjs';
 import { track, EVENTS, getAttribution } from './site.mjs';
 
 const STATE_KEY = 'ts_quiz_v1';
 const ENDPOINT = '/api/lead';
+// Impostato dalla build: 'function' (Netlify Function + Resend, default) oppure
+// 'netlify-forms' (versione drag and drop, senza funzioni).
+const LEAD_MODE = '%%LEAD_MODE%%';
 const TIMEOUT_MS = 15000;
 
 const root = document.getElementById('quiz');
@@ -318,14 +321,22 @@ async function submit(form) {
   try {
     const ctrl = new AbortController();
     const timer = setTimeout(() => ctrl.abort(), TIMEOUT_MS);
-    const res = await fetch(ENDPOINT, {
-      method: 'POST',
-      headers: { 'content-type': 'application/json' },
-      body: JSON.stringify(payload),
-      signal: ctrl.signal,
-    });
+    const res =
+      LEAD_MODE === 'netlify-forms'
+        ? await fetch('/', {
+            method: 'POST',
+            headers: { 'content-type': 'application/x-www-form-urlencoded' },
+            body: netlifyFormBody(payload).toString(),
+            signal: ctrl.signal,
+          })
+        : await fetch(ENDPOINT, {
+            method: 'POST',
+            headers: { 'content-type': 'application/json' },
+            body: JSON.stringify(payload),
+            signal: ctrl.signal,
+          });
     clearTimeout(timer);
-    const data = await res.json().catch(() => ({}));
+    const data = LEAD_MODE === 'netlify-forms' ? { ok: res.ok } : await res.json().catch(() => ({}));
     ok = res.ok && data.ok === true;
     if (!ok) {
       if (data.fields) {
@@ -360,6 +371,42 @@ async function submit(form) {
   label.textContent = idleLabel;
   alertBox.textContent = message;
   alertBox.focus();
+}
+
+/** Corpo dell'invio a Netlify Forms: ogni campo è una riga dell'email. */
+function netlifyFormBody(p) {
+  const label = (qid) => {
+    const q = QUESTIONS.find((x) => x.id === qid);
+    return q?.options.find((o) => o.id === p.answers[qid])?.label || '—';
+  };
+  const a = p.attribution;
+  const v = (x) => x || '—';
+  const now = new Intl.DateTimeFormat('it-IT', { timeZone: 'Europe/Rome', dateStyle: 'full', timeStyle: 'short' }).format(new Date());
+  return new URLSearchParams({
+    'form-name': NETLIFY_FORM_NAME,
+    website: p.website,
+    subject: `NUOVO LEAD TELESORRISO — ${p.name}`,
+    nome: p.name,
+    telefono: p.phone,
+    email: p.email,
+    'cosa-vorrebbe-migliorare': label('obiettivo'),
+    'quando-vorrebbe-iniziare': label('tempistica'),
+    'interesse-pagamento-150-al-mese': label('pagamento'),
+    sorgente: v(a.utm_source),
+    mezzo: v(a.utm_medium),
+    campagna: v(a.utm_campaign),
+    contenuto: v(a.utm_content),
+    termine: v(a.utm_term),
+    gclid: v(a.gclid),
+    fbclid: v(a.fbclid),
+    'landing-page': v(a.landing_page),
+    referrer: v(a.referrer),
+    'data-e-ora': now,
+    'presa-visione-privacy': p.consents.privacy ? 'Sì' : 'No',
+    'consenso-marketing': p.consents.marketing ? 'Sì' : 'No',
+    'id-richiesta': p.submission_id,
+    azione: 'CHIAMARE IL LEAD APPENA POSSIBILE.',
+  });
 }
 
 // --- Conferma ---------------------------------------------------------------

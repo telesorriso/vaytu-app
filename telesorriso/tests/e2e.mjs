@@ -17,6 +17,37 @@ const UTM = 'utm_source=google&utm_medium=cpc&utm_campaign=ortodonzia_test&utm_c
 const browser = await chromium.launch(process.env.CHROMIUM_PATH ? { executablePath: process.env.CHROMIUM_PATH } : {});
 if (SHOTS) await mkdir(SHOTS, { recursive: true });
 
+// L'invio del lead va a /api/lead (versione con funzione) oppure, nella
+// versione drag and drop, a Netlify Forms con un POST su "/".
+const isLeadUrl = (url) => url.pathname === '/api/lead' || url.pathname === '/';
+const isLeadRequest = (r) => r.method() === 'POST' && isLeadUrl(new URL(r.url()));
+/** Corpo dell'invio ricondotto a un'unica forma, qualunque sia la modalità. */
+function parseLead(r) {
+  const raw = r.postData();
+  if (new URL(r.url()).pathname === '/api/lead') {
+    const p = JSON.parse(raw);
+    return { ...p.attribution, answers: p.answers, marketing: p.consents.marketing, mode: 'function' };
+  }
+  const f = new URLSearchParams(raw);
+  return {
+    utm_source: f.get('sorgente'), utm_medium: f.get('mezzo'), utm_campaign: f.get('campagna'),
+    utm_content: f.get('contenuto'), utm_term: f.get('termine'), gclid: f.get('gclid'),
+    landing_page: f.get('landing-page'), referrer: f.get('referrer'),
+    answers: {
+      obiettivo: f.get('cosa-vorrebbe-migliorare'),
+      tempistica: f.get('quando-vorrebbe-iniziare'),
+      pagamento: f.get('interesse-pagamento-150-al-mese'),
+    },
+    marketing: f.get('consenso-marketing') === 'Sì',
+    subject: f.get('subject'), formName: f.get('form-name'), nome: f.get('nome'), telefono: f.get('telefono'),
+    mode: 'netlify-forms',
+  };
+}
+/** Intercetta solo i POST di invio; il resto (es. GET della landing) prosegue. */
+async function routeLead(page, handler) {
+  await page.route(isLeadUrl, (route) => (route.request().method() === 'POST' ? handler(route) : route.fallback()));
+}
+
 const results = [];
 async function check(name, fn) {
   try {
@@ -82,7 +113,7 @@ let leadRequests = [];
 await check('Percorso completo: attribuzione, avanti/indietro, validazione, invio, conferma', async () => {
   const ctx = await iphone(390, 844);
   const page = await ctx.newPage();
-  page.on('request', (r) => r.url().endsWith('/api/lead') && leadRequests.push(JSON.parse(r.postData())));
+  page.on('request', (r) => isLeadRequest(r) && leadRequests.push(parseLead(r)));
 
   // Arrivo da un sito esterno (simulato) con un annuncio che punta alla landing.
   await page.route('http://www.google.com/annuncio', (route) =>
@@ -152,17 +183,29 @@ await check('Percorso completo: attribuzione, avanti/indietro, validazione, invi
 
   assert.equal(leadRequests.length, 1);
   const p = leadRequests[0];
-  assert.equal(p.attribution.utm_source, 'google');
-  assert.equal(p.attribution.utm_medium, 'cpc');
-  assert.equal(p.attribution.utm_campaign, 'ortodonzia_test');
-  assert.equal(p.attribution.utm_content, 'annuncio_a');
-  assert.equal(p.attribution.utm_term, 'allineatori');
-  assert.equal(p.attribution.gclid, 'TEST-GCLID-123');
-  assert.equal(new URL(p.attribution.landing_page).pathname, '/', 'la landing page deve restare quella di arrivo');
-  assert.ok(p.attribution.landing_page.includes('utm_source=google'));
-  assert.equal(p.attribution.referrer, 'http://www.google.com/');
-  assert.deepEqual(p.answers, { obiettivo: 'affollati', tempistica: 'entro_1_mese', pagamento: 'entrambe' });
-  assert.equal(p.consents.marketing, false);
+  assert.equal(p.utm_source, 'google');
+  assert.equal(p.utm_medium, 'cpc');
+  assert.equal(p.utm_campaign, 'ortodonzia_test');
+  assert.equal(p.utm_content, 'annuncio_a');
+  assert.equal(p.utm_term, 'allineatori');
+  assert.equal(p.gclid, 'TEST-GCLID-123');
+  assert.equal(new URL(p.landing_page).pathname, '/', 'la landing page deve restare quella di arrivo');
+  assert.ok(p.landing_page.includes('utm_source=google'));
+  assert.equal(p.referrer, 'http://www.google.com/');
+  if (p.mode === 'function') {
+    assert.deepEqual(p.answers, { obiettivo: 'affollati', tempistica: 'entro_1_mese', pagamento: 'entrambe' });
+  } else {
+    assert.deepEqual(p.answers, {
+      obiettivo: 'Denti affollati',
+      tempistica: 'Entro 1 mese',
+      pagamento: 'Vorrei conoscere entrambe le possibilità',
+    });
+    assert.equal(p.formName, 'lead');
+    assert.equal(p.subject, 'NUOVO LEAD TELESORRISO — Giulia Bianchi');
+    assert.equal(p.nome, 'Giulia Bianchi');
+  }
+  assert.equal(p.marketing, false);
+  console.log(`      (modalità di invio: ${p.mode})`);
 
   const ev = await events(page);
   for (const e of ['PageView', 'QuizStarted', 'QuizQuestion1Completed', 'QuizQuestion2Completed',
@@ -183,7 +226,7 @@ await check('Errore di invio: messaggio chiaro, dati conservati, nuovo tentativo
   const ctx = await iphone(375, 667);
   const page = await ctx.newPage();
   let calls = 0;
-  await page.route('**/api/lead', (route) => {
+  await routeLead(page, (route) => {
     calls++;
     return route.fulfill({ status: 502, contentType: 'application/json', body: '{"ok":false,"error":"x"}' });
   });
@@ -198,8 +241,8 @@ await check('Errore di invio: messaggio chiaro, dati conservati, nuovo tentativo
   assert.equal(await page.getByRole('button', { name: /Richiedi le 2 valutazioni/ }).isEnabled(), true);
 
   // Rete assente.
-  await page.unroute('**/api/lead');
-  await page.route('**/api/lead', (route) => {
+  await page.unroute(isLeadUrl);
+  await routeLead(page, (route) => {
     calls++;
     return route.abort('internetdisconnected');
   });
@@ -211,7 +254,7 @@ await check('Errore di invio: messaggio chiaro, dati conservati, nuovo tentativo
   await page.getByRole('heading', { name: 'Ci siamo quasi.' }).waitFor();
   assert.equal(await page.getByLabel('Email').inputValue(), 'giulia.bianchi@example.it');
 
-  await page.unroute('**/api/lead');
+  await page.unroute(isLeadUrl);
   await page.getByRole('button', { name: /Richiedi le 2 valutazioni/ }).click();
   await page.getByRole('heading', { name: 'Richiesta ricevuta ✓' }).waitFor();
   assert.equal(calls, 2);
@@ -223,7 +266,7 @@ await check('Doppio invio accidentale: una sola richiesta', async () => {
   const ctx = await iphone(430, 932);
   const page = await ctx.newPage();
   let calls = 0;
-  await page.route('**/api/lead', async (route) => {
+  await routeLead(page, async (route) => {
     calls++;
     await new Promise((r) => setTimeout(r, 600));
     return route.continue();

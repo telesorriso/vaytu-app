@@ -110,6 +110,19 @@ Le anteprime Netlify hanno già `X-Robots-Tag: noindex`.
 
 Per testare l'invio in anteprima senza email reali, imposta `LEAD_EMAIL_DRY_RUN=true` solo nel contesto "Deploy Previews".
 
+## Pubblicazione drag and drop (Netlify Forms, senza variabili)
+
+In questa modalità il modulo usa i Netlify Forms. Non serve nessuna funzione e nessuna variabile d'ambiente.
+
+1. Crea lo ZIP con `npm run build:dragdrop`: il contenuto della cartella `dist/` è quello da trascinare.
+2. In Netlify apri **Forms** e premi **Enable form detection**, poi trascina la cartella nella pagina **Deploys**. Il rilevamento vale solo per i deploy fatti dopo l'attivazione.
+3. Verifica che in **Forms** compaia il modulo `lead`.
+4. Vai su **Site configuration → Notifications → Emails and webhooks → Form submission notifications → Add notification → Email notification**. Scegli il modulo `lead` e l'indirizzo della segreteria.
+
+L'oggetto dell'email è "NUOVO LEAD TELESORRISO — Nome Cognome" (campo `subject`). Ogni riga del corpo è un campo del modulo, nell'ordine definito in `shared/quiz.mjs` (`NETLIFY_FORM_FIELDS`).
+
+Anti-spam: honeypot (`website`) più il filtro spam integrato di Netlify. Senza funzione non ci sono controlli lato server: valgono solo quelli nel browser.
+
 ## Tracciamento
 
 Eventi inviati al `dataLayer`:
