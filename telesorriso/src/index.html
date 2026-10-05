@@ -4,10 +4,10 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <title>Ortodonzia trasparente da €150 al mese | Telesorriso</title>
-  <meta name="description" content="Ortodonzia trasparente a partire da €150 al mese per 24 mesi, senza interessi per il paziente. Inizia con 2 valutazioni iniziali senza costo e senza impegno.">
+  <meta name="description" content="Ortodonzia trasparente a partire da €150 al mese per 24 mesi, senza interessi, tutto incluso. Inizia con 2 valutazioni iniziali senza costo e senza impegno.">
   <!-- @include head -->
   <meta property="og:title" content="Ortodonzia trasparente da €150 al mese | Telesorriso">
-  <meta property="og:description" content="24 mesi, senza interessi per il paziente, tutto incluso. Inizia con 2 valutazioni iniziali senza costo.">
+  <meta property="og:description" content="24 mesi, senza interessi, tutto incluso. Inizia con 2 valutazioni iniziali senza costo.">
 </head>
 <body>
   <a class="skip-link" href="#contenuto">Vai al contenuto</a>
@@ -23,46 +23,103 @@
   <main id="contenuto">
     <!-- =====================================================================
          CRO — I testi di questa pagina si modificano direttamente qui.
-         I segnaposto da completare hanno la classe "ph" (cerca: class="ph").
+         FOTO HERO: sostituire /img/hero.svg con una foto reale (es. hero.jpg,
+         formato verticale 4:5, ~1000x1250 px, < 150 KB) e aggiornare src.
          ===================================================================== -->
 
     <!-- 1. HERO ------------------------------------------------------------ -->
     <section class="hero" aria-labelledby="hero-title">
-      <div class="wrap">
+      <div class="wrap hero-grid">
         <div class="hero-copy">
-          <h1 id="hero-title">
-            <span class="eyebrow">Ortodonzia trasparente</span>
-            Il tuo nuovo sorriso
-          </h1>
-
-          <p class="price">
-            <span class="sr-only">A partire da 150 euro al mese</span>
-            <span class="price-from" aria-hidden="true">da</span>
-            <span class="price-amount" aria-hidden="true">€150</span>
-            <span class="price-period" aria-hidden="true">al mese</span>
+          <p class="pill">
+            <svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><path d="M3.5 8.2l3 3L12.5 5" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            Ortodonzia trasparente
           </p>
 
-          <p class="terms">24 mesi <span aria-hidden="true">·</span> senza interessi per il paziente <span aria-hidden="true">·</span> tutto incluso*</p>
+          <h1 id="hero-title">Il tuo nuovo sorriso <span class="hl">da €150 al mese</span></h1>
 
-          <p class="badge">
-            <svg width="20" height="20" viewBox="0 0 20 20" aria-hidden="true"><circle cx="10" cy="10" r="10" fill="currentColor" opacity=".15"/><path d="M6 10.2l2.6 2.6L14 7.4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-            2 valutazioni iniziali senza costo
+          <ul class="chips" aria-label="Condizioni">
+            <li>24 mesi</li>
+            <li>Senza interessi</li>
+            <li>Tutto incluso</li>
+          </ul>
+
+          <p class="gift">
+            <span class="gift-icon" aria-hidden="true">
+              <svg width="22" height="22" viewBox="0 0 24 24"><path d="M4 11h16v9a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-9zm-1-4h18v4H3V7zm9 0v14M12 7S10.5 3 8 3a2 2 0 0 0 0 4h4zm0 0s1.5-4 4-4a2 2 0 0 1 0 4h-4z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg>
+            </span>
+            <span><strong>2 valutazioni iniziali senza costo</strong><br>e nessun obbligo di iniziare</span>
           </p>
+
+          <div class="hero-cta" data-hide-sticky>
+            <a class="btn btn-block btn-xl" href="/valutazione/" data-funnel-link data-cta="hero">
+              Scopri se è adatto a te
+              <svg width="20" height="20" viewBox="0 0 20 20" aria-hidden="true"><path d="M4 10h11m-4-4.5L15.5 10 11 14.5" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </a>
+            <p class="cta-note">3 domande · 60 secondi · nessun impegno</p>
+          </div>
         </div>
 
-        <div class="hero-cta" data-hide-sticky>
-          <a class="btn btn-block" href="/valutazione/" data-funnel-link data-cta="hero">
-            Scopri se è adatto a te
-            <svg width="20" height="20" viewBox="0 0 20 20" aria-hidden="true"><path d="M4 10h11m-4-4.5L15.5 10 11 14.5" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-          </a>
-          <p class="cta-note">3 domande · circa 60 secondi · nessun impegno</p>
-        </div>
-
-        <p class="offer-note">*<span class="ph">Condizioni dell’offerta e del sistema di pagamento da completare e verificare prima della pubblicazione.</span></p>
+        <figure class="hero-media">
+          <img src="/img/hero.svg" alt="" width="640" height="720" decoding="async">
+          <div class="float-card float-top" aria-hidden="true">
+            <span class="float-amount">€150</span><span class="float-label">al mese</span>
+          </div>
+          <div class="float-card float-bottom" aria-hidden="true">
+            <span class="float-check">✓</span> Allineatori trasparenti
+          </div>
+        </figure>
       </div>
     </section>
 
-    <!-- 2. COME FUNZIONA --------------------------------------------------- -->
+    <!-- Rassicurazioni -->
+    <div class="trust">
+      <ul class="wrap trust-list">
+        <li>Nessun pagamento online</li>
+        <li>Ti richiamiamo noi</li>
+        <li>Decidi con calma</li>
+      </ul>
+    </div>
+
+    <!-- 2. TUTTO INCLUSO -------------------------------------------------- -->
+    <section class="section" aria-labelledby="incluso">
+      <div class="wrap">
+        <div class="section-head">
+          <span class="kicker">€150 al mese, tutto incluso</span>
+          <h2 id="incluso">Una rata chiara. Nessuna sorpresa.</h2>
+          <p>24 mesi, senza interessi. Nella rata è compreso tutto il percorso:</p>
+        </div>
+        <!-- Inclusioni: una card per voce. -->
+        <ul class="include-grid">
+          <li class="include-card">
+            <span class="include-icon" aria-hidden="true">
+              <svg width="26" height="26" viewBox="0 0 24 24"><path d="M5 9c0-3 2-5 4-5 1.3 0 2 .8 3 .8S13.7 4 15 4c2 0 4 2 4 5 0 2.4-1.2 4-1.8 6.3-.5 2-.8 4.7-2.3 4.7-1.4 0-1.4-2.6-1.9-4.4-.3-.8-.6-1.2-1-1.2s-.7.4-1 1.2c-.5 1.8-.5 4.4-1.9 4.4-1.5 0-1.8-2.7-2.3-4.7C6.2 13 5 11.4 5 9z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg>
+            </span>
+            <h3>Allineatori trasparenti</h3>
+            <p>Tutti gli allineatori del tuo percorso.</p>
+          </li>
+          <li class="include-card">
+            <span class="include-icon" aria-hidden="true">
+              <svg width="26" height="26" viewBox="0 0 24 24"><path d="M12 3l7 3v5c0 4.5-3 8.3-7 10-4-1.7-7-5.5-7-10V6l7-3z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M8.5 12l2.4 2.4L15.5 9.8" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </span>
+            <h3>Contenzioni finali</h3>
+            <p>Per mantenere nel tempo il risultato raggiunto.</p>
+          </li>
+          <li class="include-card">
+            <span class="include-icon" aria-hidden="true">
+              <svg width="26" height="26" viewBox="0 0 24 24"><path d="M12 3l2.6 5.3 5.9.9-4.3 4.1 1 5.8L12 16.4l-5.2 2.7 1-5.8-4.3-4.1 5.9-.9L12 3z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg>
+            </span>
+            <h3>Rifinitura finale gratuita</h3>
+            <p>Se alla fine non sei soddisfatto al 100% del risultato.</p>
+          </li>
+        </ul>
+        <div class="section-cta">
+          <a class="btn btn-block" href="/valutazione/" data-funnel-link data-cta="incluso">Scopri se è adatto a te</a>
+        </div>
+      </div>
+    </section>
+
+    <!-- 3. COME FUNZIONA --------------------------------------------------- -->
     <section class="section section-soft" aria-labelledby="come-funziona">
       <div class="wrap">
         <div class="section-head">
@@ -73,153 +130,95 @@
           <li>
             <div>
               <h3>Rispondi a 3 domande</h3>
-              <p>Ci servono circa 60 secondi per capire cosa vorresti migliorare.</p>
+              <p>Bastano 60 secondi per dirci cosa vorresti migliorare.</p>
             </div>
           </li>
           <li>
             <div>
-              <h3>Ti ricontattiamo</h3>
-              <p>Ti chiamiamo per darti tutte le informazioni sul percorso e rispondere alle tue domande.</p>
+              <h3>Ti richiamiamo noi</h3>
+              <p>Ti diamo tutte le informazioni sul percorso e rispondiamo alle tue domande.</p>
             </div>
           </li>
           <li>
             <div>
-              <h3>Se vuoi, fissi la prima valutazione</h3>
-              <p>La prima delle due valutazioni iniziali, senza costo. Decidi tu se e quando.</p>
+              <h3>Fissi la prima valutazione</h3>
+              <p>Solo se vuoi. Le prime due valutazioni sono senza costo.</p>
             </div>
           </li>
         </ol>
       </div>
     </section>
 
-    <!-- 3. DUE VALUTAZIONI INIZIALI --------------------------------------- -->
+    <!-- 4. DUE VALUTAZIONI INIZIALI --------------------------------------- -->
     <section class="section" aria-labelledby="valutazioni">
       <div class="wrap">
         <div class="section-head">
           <span class="kicker">Prima di decidere</span>
           <h2 id="valutazioni">2 valutazioni iniziali senza costo</h2>
-          <p>Inizi con due valutazioni, senza costo e senza obbligo di iniziare il trattamento. Servono a capire se l’ortodonzia trasparente è adatta a te e a ricevere tutte le informazioni sul percorso.</p>
+          <p>Prima di scegliere, hai due incontri senza costo e senza obbligo di iniziare il trattamento.</p>
         </div>
         <div class="eval-grid">
           <div class="card">
-            <span class="eval-num">Valutazione 1</span>
-            <h3>Prima valutazione</h3>
-            <p><span class="ph">[DA CONFERMARE: cosa comprende la prima valutazione]</span></p>
+            <span class="eval-num">1ª valutazione</span>
+            <h3>Capiamo se fa per te</h3>
+            <p>Conosciamo il tuo sorriso e valutiamo se l’ortodonzia trasparente è adatta a te.</p>
           </div>
           <div class="card">
-            <span class="eval-num">Valutazione 2</span>
-            <h3>Seconda valutazione</h3>
-            <p><span class="ph">[DA CONFERMARE: cosa comprende la seconda valutazione]</span></p>
+            <span class="eval-num">2ª valutazione</span>
+            <h3>Ricevi la tua proposta</h3>
+            <p>Ti presentiamo la proposta di percorso e rispondiamo a tutte le tue domande. Poi decidi tu.</p>
           </div>
-        </div>
-        <ul class="reassure">
-          <li><span class="check" aria-hidden="true"><svg width="14" height="14" viewBox="0 0 14 14"><path d="M3 7.2l2.6 2.6L11 4.4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span>Nessun costo per le due valutazioni iniziali</span></li>
-          <li><span class="check" aria-hidden="true"><svg width="14" height="14" viewBox="0 0 14 14"><path d="M3 7.2l2.6 2.6L11 4.4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span>Nessun obbligo di iniziare il trattamento</span></li>
-          <li><span class="check" aria-hidden="true"><svg width="14" height="14" viewBox="0 0 14 14"><path d="M3 7.2l2.6 2.6L11 4.4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span>Decidi con calma, dopo aver ricevuto tutte le informazioni</span></li>
-        </ul>
-      </div>
-    </section>
-
-    <!-- 4. €150 AL MESE + 5. TUTTO INCLUSO --------------------------------- -->
-    <section class="section section-soft" aria-labelledby="prezzo">
-      <div class="wrap split">
-        <div class="card price-card">
-          <h2 id="prezzo" class="sr-only">Quanto costa</h2>
-          <p class="price">
-            <span class="sr-only">150 euro al mese</span>
-            <span class="price-amount" aria-hidden="true">€150</span>
-            <span class="price-period" aria-hidden="true">al mese</span>
-          </p>
-          <ul class="price-facts">
-            <li>24 mesi</li>
-            <li>senza interessi per il paziente</li>
-            <li>tutto incluso*</li>
-          </ul>
-          <a class="btn btn-block" href="/valutazione/" data-funnel-link data-cta="prezzo">Scopri se è adatto a te</a>
-          <p class="offer-note">*<span class="ph">Condizioni dell’offerta e del sistema di pagamento da completare e verificare prima della pubblicazione.</span></p>
-        </div>
-
-        <div>
-          <div class="section-head">
-            <span class="kicker">Tutto incluso</span>
-            <h2 id="incluso">Cosa significa “tutto incluso”</h2>
-            <p>Una rata mensile chiara, senza sorprese. Il percorso comprende:</p>
-          </div>
-          <!-- Elenco delle inclusioni: una voce per <li>. Da confermare prima della pubblicazione. -->
-          <ul class="includes" aria-labelledby="incluso">
-            <li><span class="check" aria-hidden="true"><svg width="14" height="14" viewBox="0 0 14 14"><path d="M3 7.2l2.6 2.6L11 4.4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span>Allineatori trasparenti</span></li>
-            <li><span class="check" aria-hidden="true"><svg width="14" height="14" viewBox="0 0 14 14"><path d="M3 7.2l2.6 2.6L11 4.4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="ph">[DA CONFERMARE]</span></li>
-            <li><span class="check" aria-hidden="true"><svg width="14" height="14" viewBox="0 0 14 14"><path d="M3 7.2l2.6 2.6L11 4.4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="ph">[DA CONFERMARE]</span></li>
-            <li><span class="check" aria-hidden="true"><svg width="14" height="14" viewBox="0 0 14 14"><path d="M3 7.2l2.6 2.6L11 4.4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="ph">[DA CONFERMARE]</span></li>
-          </ul>
         </div>
       </div>
     </section>
 
-    <!-- 6. FAQ ------------------------------------------------------------- -->
-    <section class="section" aria-labelledby="faq">
+    <!-- 5. FAQ ------------------------------------------------------------- -->
+    <section class="section section-soft" aria-labelledby="faq">
       <div class="wrap faq-wrap">
         <div class="section-head">
           <span class="kicker">Domande frequenti</span>
-          <h2 id="faq">Le risposte alle domande più comuni</h2>
+          <h2 id="faq">Hai qualche dubbio?</h2>
         </div>
         <div class="faq">
           <details>
             <summary>Le due valutazioni hanno davvero costo zero?</summary>
-            <div class="answer">
-              <p>Sì, le due valutazioni iniziali sono senza costo per te.</p>
-              <p><span class="ph">[DA CONFERMARE: eventuali esami o prestazioni non compresi]</span></p>
-            </div>
+            <div class="answer"><p>Sì. Entrambe le valutazioni iniziali sono senza costo e senza impegno.</p></div>
           </details>
           <details>
             <summary>Sono obbligato a iniziare il trattamento?</summary>
-            <div class="answer">
-              <p>No. Le valutazioni servono a capire se il percorso è adatto a te e a darti tutte le informazioni. Decidi tu se e quando iniziare.</p>
-            </div>
+            <div class="answer"><p>No. Le valutazioni servono a capire se il percorso è adatto a te e a darti tutte le informazioni. Decidi tu se e quando iniziare.</p></div>
           </details>
           <details>
             <summary>Come funziona il pagamento da €150 al mese?</summary>
-            <div class="answer">
-              <p>Il percorso si paga a partire da €150 al mese per 24 mesi, senza interessi a carico del paziente, secondo le condizioni del sistema di pagamento. Durante la telefonata ti spieghiamo tutti i dettagli.</p>
-              <p><span class="ph">[DA COMPLETARE E VERIFICARE: condizioni del sistema di pagamento]</span></p>
-            </div>
+            <div class="answer"><p>Il percorso si paga a partire da €150 al mese per 24 mesi, senza interessi a tuo carico. La rata comprende allineatori trasparenti, contenzioni finali e rifinitura finale gratuita. Durante la telefonata ti spieghiamo tutti i dettagli.</p></div>
           </details>
           <details>
-            <summary>Ci sono interessi per il paziente?</summary>
-            <div class="answer">
-              <p>No, il pagamento mensile non prevede interessi a carico del paziente, secondo le condizioni applicabili al sistema di pagamento.</p>
-              <p><span class="ph">[DA COMPLETARE E VERIFICARE: condizioni del sistema di pagamento]</span></p>
-            </div>
+            <summary>Ci sono interessi da pagare?</summary>
+            <div class="answer"><p>No, il pagamento mensile non prevede interessi a carico del paziente.</p></div>
           </details>
           <details>
             <summary>L’ortodonzia trasparente è adatta a tutti?</summary>
-            <div class="answer">
-              <p>Non sempre: dipende dalla situazione di ciascuno. Per questo il percorso inizia con le valutazioni, che servono proprio a capire se è la soluzione giusta per te.</p>
-            </div>
+            <div class="answer"><p>Non sempre: dipende dalla situazione di ciascuno. Per questo il percorso inizia con le valutazioni, che servono proprio a capire se è la soluzione giusta per te.</p></div>
           </details>
           <details>
             <summary>Cosa succede dopo il questionario?</summary>
-            <div class="answer">
-              <p>Ti chiamiamo al numero che ci hai lasciato per darti tutte le informazioni e, se lo desideri, fissare la prima valutazione. Non devi prenotare nulla online.</p>
-            </div>
+            <div class="answer"><p>Ti chiamiamo al numero che ci hai lasciato per darti tutte le informazioni e, se lo desideri, fissare la prima valutazione. Non devi prenotare nulla online.</p></div>
           </details>
           <details>
             <summary>Dove vengono effettuate le valutazioni?</summary>
-            <div class="answer">
-              <p><span class="ph">[DA CONFERMARE: nome e indirizzo dello studio dove si svolgono le valutazioni]</span></p>
-            </div>
+            <div class="answer"><p>Te lo comunichiamo durante la telefonata, insieme ai giorni e agli orari disponibili.</p></div>
           </details>
         </div>
       </div>
     </section>
 
-    <!-- 7. CTA FINALE ------------------------------------------------------ -->
+    <!-- 6. CTA FINALE ------------------------------------------------------ -->
     <section class="final" aria-labelledby="cta-finale" data-hide-sticky>
       <div class="wrap">
-        <h2 id="cta-finale">Scopri se l’ortodonzia trasparente è adatta a te</h2>
-        <p class="final-price">Da <strong>€150 al mese</strong> · 2 valutazioni iniziali senza costo</p>
-        <a class="btn" href="/valutazione/" data-funnel-link data-cta="finale">Inizia il questionario</a>
-        <p class="cta-note">3 domande · circa 60 secondi · nessun impegno</p>
+        <h2 id="cta-finale">Il tuo nuovo sorriso inizia da qui</h2>
+        <p class="final-price"><strong>€150 al mese</strong> · 24 mesi · senza interessi · tutto incluso</p>
+        <a class="btn btn-xl" href="/valutazione/" data-funnel-link data-cta="finale">Scopri se è adatto a te</a>
+        <p class="cta-note">2 valutazioni iniziali senza costo · nessun impegno</p>
       </div>
     </section>
   </main>

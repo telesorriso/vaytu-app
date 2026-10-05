@@ -167,10 +167,12 @@ I primi tre controlli rispondono "ok" senza inviare nulla, per non dare indizi a
 - **Testi della landing:** `src/index.html`.
 - **Domande e opzioni:** testi, ordine e numero in `shared/quiz.mjs`. L'email si adegua da sola.
 - **Inclusioni "tutto incluso" e FAQ:** liste in `src/index.html`.
+- **Foto dell'hero:** oggi è un'illustrazione (`src/img/hero.svg`). Per usare una foto reale, aggiungi `src/img/hero.jpg` (verticale 4:5, circa 1000×1250 px, sotto i 150 KB) e cambia `src` nel tag `<img>` dentro `.hero-media` in `src/index.html`.
 
 ## Limitazioni note
 
 - Limite per IP e deduplica sono **in memoria** per istanza della funzione. Bastano per doppi clic e retry, ma non fermano un attacco distribuito. Se servisse, il passo successivo è Netlify Blobs o un CAPTCHA non invasivo (es. Turnstile).
 - Le email non vengono archiviate altrove: se Resend accetta l'email ma questa non arriva (spam, casella piena), il lead resta solo nei log di Resend.
 - Lighthouse non è stato eseguito in questo ambiente. La pagina è leggera (~29 KB di HTML con CSS inline, ~25 KB di JS, nessun font esterno), ma va misurata sull'anteprima.
-- I testi legali sono **bozze** con segnaposto evidenziati in giallo: non pubblicare senza validazione.
+- Landing, questionario e footer non hanno segnaposto visibili.
+- Le pagine Privacy, Cookie e Note legali restano **bozze** con segnaposto in giallo: dati del titolare, direttore sanitario, testi legali e condizioni del sistema di pagamento. Vanno completate prima di avviare le campagne.
